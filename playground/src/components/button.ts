@@ -2,6 +2,7 @@ import { createApp, defineComponent as vueDefineComponent, h } from "vue";
 import { ElButton } from "element-plus";
 import "element-plus/es/components/button/style/css";
 import { defineComponent } from "@x-lang/core";
+import type { SkeletonContext } from "@x-lang/core";
 
 interface ButtonData {
   readonly text: string;
@@ -10,14 +11,25 @@ interface ButtonData {
   readonly onClick?: string;
 }
 
+const TEXT_RE = /["']([^"']+)["']/;
+
+function inferSkeletonWidth(ctx: SkeletonContext): number {
+  const match = TEXT_RE.exec(ctx.content);
+  if (match?.[1]) {
+    return Math.max(60, match[1].length * 14 + 24);
+  }
+  return 80;
+}
+
 export const button = defineComponent<ButtonData>("button", {
-  skeleton(container) {
+  skeleton(container, ctx) {
+    const width = inferSkeletonWidth(ctx);
     const wrapper = document.createElement("div");
     wrapper.style.padding = "4px 0";
 
     const btn = document.createElement("div");
     btn.className = "skeleton-line";
-    btn.style.width = "80px";
+    btn.style.width = `${width}px`;
     btn.style.height = "32px";
     btn.style.borderRadius = "4px";
 

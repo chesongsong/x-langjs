@@ -34,7 +34,15 @@ export type RenderFn<T = unknown> = (
   ctx: RenderContext,
 ) => ComponentHandle<T>;
 
-export type SkeletonFn = (container: HTMLElement) => Disposable;
+export interface SkeletonContext {
+  readonly content: string;
+  readonly variables: Readonly<Record<string, unknown>>;
+}
+
+export type SkeletonFn = (
+  container: HTMLElement,
+  ctx: SkeletonContext,
+) => Disposable;
 
 export interface ComponentDefinition<T = unknown> {
   readonly name: string;
@@ -88,8 +96,11 @@ export function defineComponent<T>(
 
   const createSkeletonRenderer = skeletonFn
     ? () => ({
-        render(_data: PendingData, container: HTMLElement): Disposable {
-          return skeletonFn(container);
+        render(data: PendingData, container: HTMLElement): Disposable {
+          return skeletonFn(container, {
+            content: data.content,
+            variables: data.variables ?? {},
+          });
         },
       })
     : undefined;

@@ -104,12 +104,17 @@ export class XLangApp {
     }
   }
 
+  reset(): this {
+    this.engine.disposeAll();
+    return this;
+  }
+
   run(source: string, container: HTMLElement): void {
     const builtins = this.components.map((c) => c.renderable);
     const { segments, errors } = run(source, {
       variables: this.vars,
       builtins,
     });
-    this.engine.renderSegments(segments, errors, container);
+    this.engine.renderSegments(segments, errors, container, this.vars);
   }
 }

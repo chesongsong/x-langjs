@@ -32,6 +32,7 @@ export interface CodeBlockData {
 export interface PendingData {
   readonly language: string;
   readonly content: string;
+  readonly variables?: Readonly<Record<string, unknown>>;
 }
 
 export interface ComponentFactory {

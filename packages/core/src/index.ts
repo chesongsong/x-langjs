@@ -16,6 +16,7 @@ export type {
   AdvancedSetup,
   RenderFn,
   SkeletonFn,
+  SkeletonContext,
 } from "./define-component.js";
 
 // Render types (re-export for convenience)

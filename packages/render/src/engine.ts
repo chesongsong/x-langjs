@@ -19,16 +19,26 @@ export interface ComponentInstance {
 const IDENTIFIER_RE =
   /^[a-zA-Z_$\u4e00-\u9fff\u3400-\u4dbf][a-zA-Z0-9_$\u4e00-\u9fff\u3400-\u4dbf]*/;
 
+interface RenderedSlot {
+  fingerprint: string;
+  wrapper: HTMLElement;
+  disposables: Disposable[];
+  instances: ComponentInstance[];
+}
+
 export class RenderEngine {
   private factory: ComponentFactory;
-  private disposables: Disposable[] = [];
-  private instances: ComponentInstance[] = [];
   private eventCallback: EventCallback | undefined;
-  private kindCounters = new Map<string, number>();
   private skeletonFactories = new Map<
     string,
     () => ComponentRenderer<PendingData>
   >();
+
+  private slots: RenderedSlot[] = [];
+  private errorWrapper: HTMLElement | null = null;
+  private errorDisposables: Disposable[] = [];
+  private prevErrorHash = "";
+  private currentVariables: Readonly<Record<string, unknown>> = {};
 
   constructor(factory: ComponentFactory) {
     this.factory = factory;
@@ -50,100 +60,173 @@ export class RenderEngine {
   }
 
   getInstances(kind?: string): readonly ComponentInstance[] {
-    if (!kind) return this.instances;
-    return this.instances.filter((i) => i.kind === kind);
+    const all = this.slots.flatMap((s) => s.instances);
+    if (!kind) return all;
+    return all.filter((i) => i.kind === kind);
   }
 
   renderSegments(
     segments: readonly OutputSegment[],
     errors: readonly { message: string }[],
     container: HTMLElement,
+    variables?: Readonly<Record<string, unknown>>,
   ): void {
-    this.disposeAll();
-    container.innerHTML = "";
+    this.currentVariables = variables ?? {};
+    this.renderErrors(errors, container);
+    this.patchSegments(segments, container);
+  }
 
-    if (errors.length > 0) {
-      const errDiv = document.createElement("div");
-      errDiv.className = "render-errors";
-      for (const e of errors) {
-        const item = document.createElement("div");
-        item.className = "render-error-item";
-        item.textContent = e.message;
-        errDiv.appendChild(item);
-      }
-      container.appendChild(errDiv);
+  private renderErrors(
+    errors: readonly { message: string }[],
+    container: HTMLElement,
+  ): void {
+    const hash = errors.map((e) => e.message).join("\0");
+    if (hash === this.prevErrorHash) return;
+    this.prevErrorHash = hash;
+
+    for (const d of this.errorDisposables) d.dispose();
+    this.errorDisposables = [];
+
+    if (this.errorWrapper) {
+      this.errorWrapper.remove();
+      this.errorWrapper = null;
     }
 
-    for (const segment of segments) {
-      switch (segment.type) {
-        case "markdown":
-          this.renderMarkdown(segment.content, container);
-          break;
-        case "codeblock":
-          this.renderCodeBlock(segment.language, segment.content, container);
-          break;
-        case "pending":
-          this.renderPending(segment.language, segment.content, container);
-          break;
-        case "scope":
-          this.renderScope(segment.result, container);
-          break;
+    if (errors.length === 0) return;
+
+    const errDiv = document.createElement("div");
+    errDiv.className = "render-errors";
+    for (const e of errors) {
+      const item = document.createElement("div");
+      item.className = "render-error-item";
+      item.textContent = e.message;
+      errDiv.appendChild(item);
+    }
+
+    container.insertBefore(errDiv, container.firstChild);
+    this.errorWrapper = errDiv;
+  }
+
+  private patchSegments(
+    segments: readonly OutputSegment[],
+    container: HTMLElement,
+  ): void {
+    const newFingerprints = segments.map((s) => this.fingerprint(s));
+
+    let firstDiff = 0;
+    while (
+      firstDiff < this.slots.length &&
+      firstDiff < newFingerprints.length
+    ) {
+      const prev = this.slots[firstDiff]!;
+      if (prev.fingerprint !== newFingerprints[firstDiff]) break;
+      firstDiff++;
+    }
+
+    for (let i = this.slots.length - 1; i >= firstDiff; i--) {
+      const slot = this.slots[i]!;
+      for (const d of slot.disposables) d.dispose();
+      slot.wrapper.remove();
+    }
+    this.slots.length = firstDiff;
+
+    for (let i = firstDiff; i < segments.length; i++) {
+      const segment = segments[i]!;
+      const fp = newFingerprints[i]!;
+      const slot = this.renderOneSegment(segment, container);
+      slot.fingerprint = fp;
+      this.slots.push(slot);
+    }
+  }
+
+  private renderOneSegment(
+    segment: OutputSegment,
+    container: HTMLElement,
+  ): RenderedSlot {
+    const slot: RenderedSlot = {
+      fingerprint: "",
+      wrapper: document.createElement("div"),
+      disposables: [],
+      instances: [],
+    };
+
+    container.appendChild(slot.wrapper);
+
+    switch (segment.type) {
+      case "markdown":
+        this.renderMarkdown(segment.content, slot);
+        break;
+      case "codeblock":
+        this.renderCodeBlock(segment.language, segment.content, slot);
+        break;
+      case "pending":
+        this.renderPending(segment.language, segment.content, slot);
+        break;
+      case "scope":
+        this.renderScope(segment.result, slot);
+        break;
+    }
+
+    return slot;
+  }
+
+  private fingerprint(segment: OutputSegment): string {
+    switch (segment.type) {
+      case "markdown":
+        return `md\0${segment.content}`;
+      case "codeblock":
+        return `cb\0${segment.language}\0${segment.content}`;
+      case "pending":
+        return `pd\0${segment.language}\0${segment.content}`;
+      case "scope": {
+        const r = segment.result;
+        return `sc\0${r.index}\0${r.value.toString()}\0${r.error ?? ""}`;
       }
     }
   }
 
-  private renderMarkdown(content: string, container: HTMLElement): void {
-    const wrapper = document.createElement("div");
-    wrapper.className = "render-segment render-markdown";
-    container.appendChild(wrapper);
-
+  private renderMarkdown(content: string, slot: RenderedSlot): void {
+    slot.wrapper.className = "render-segment render-markdown";
     const renderer = this.factory.createMarkdownRenderer();
-    const disposable = renderer.render(content, wrapper);
-    this.disposables.push(disposable);
+    slot.disposables.push(renderer.render(content, slot.wrapper));
   }
 
   private renderCodeBlock(
     language: string,
     content: string,
-    container: HTMLElement,
+    slot: RenderedSlot,
   ): void {
-    const wrapper = document.createElement("div");
-    wrapper.className = "render-segment render-codeblock";
-    container.appendChild(wrapper);
-
+    slot.wrapper.className = "render-segment render-codeblock";
     const renderer = this.factory.createCodeBlockRenderer();
-    const disposable = renderer.render({ language, content }, wrapper);
-    this.disposables.push(disposable);
+    slot.disposables.push(renderer.render({ language, content }, slot.wrapper));
   }
 
   private renderPending(
     language: string,
     content: string,
-    container: HTMLElement,
+    slot: RenderedSlot,
   ): void {
     const componentName = this.detectComponentName(content);
+
+    const pendingData: PendingData = {
+      language,
+      content,
+      variables: this.currentVariables,
+    };
 
     if (componentName) {
       const skeletonFactory = this.skeletonFactories.get(componentName);
       if (skeletonFactory) {
-        const wrapper = document.createElement("div");
-        wrapper.className = `render-segment render-pending render-pending-${componentName}`;
-        container.appendChild(wrapper);
-
+        slot.wrapper.className = `render-segment render-pending render-pending-${componentName}`;
         const renderer = skeletonFactory();
-        const disposable = renderer.render({ language, content }, wrapper);
-        this.disposables.push(disposable);
+        slot.disposables.push(renderer.render(pendingData, slot.wrapper));
         return;
       }
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "render-segment render-pending";
-    container.appendChild(wrapper);
-
+    slot.wrapper.className = "render-segment render-pending";
     const renderer = this.factory.createPendingRenderer();
-    const disposable = renderer.render({ language, content }, wrapper);
-    this.disposables.push(disposable);
+    slot.disposables.push(renderer.render(pendingData, slot.wrapper));
   }
 
   private detectComponentName(content: string): string | null {
@@ -154,13 +237,11 @@ export class RenderEngine {
 
   private renderScope(
     result: { value: ZValue; error?: string },
-    container: HTMLElement,
+    slot: RenderedSlot,
   ): void {
     if (result.error) {
-      const errDiv = document.createElement("div");
-      errDiv.className = "render-segment render-error-item";
-      errDiv.textContent = result.error;
-      container.appendChild(errDiv);
+      slot.wrapper.className = "render-segment render-error-item";
+      slot.wrapper.textContent = result.error;
       return;
     }
 
@@ -169,28 +250,35 @@ export class RenderEngine {
     if (value instanceof ZRenderable) {
       const renderer = this.factory.createRenderer(value.kind);
       if (renderer) {
-        const wrapper = document.createElement("div");
-        wrapper.className = `render-segment render-${value.kind}`;
-        container.appendChild(wrapper);
-
+        slot.wrapper.className = `render-segment render-${value.kind}`;
         const kind = value.kind;
         const ctx = this.createRenderContext(kind);
-        const handle = renderer.render(value.renderData, wrapper, ctx);
+        const handle = renderer.render(value.renderData, slot.wrapper, ctx);
 
-        this.disposables.push(handle);
-        this.trackInstance(kind, handle as ComponentHandle);
+        slot.disposables.push(handle);
+        slot.instances.push({
+          kind,
+          index: this.countKind(kind),
+          handle: handle as ComponentHandle,
+        });
         return;
       }
     }
 
     const formatted = value.toString();
-    const wrapper = document.createElement("div");
-    wrapper.className = "render-segment render-scope";
-    container.appendChild(wrapper);
-
+    slot.wrapper.className = "render-segment render-scope";
     const renderer = this.factory.createMarkdownRenderer();
-    const disposable = renderer.render(formatted, wrapper);
-    this.disposables.push(disposable);
+    slot.disposables.push(renderer.render(formatted, slot.wrapper));
+  }
+
+  private countKind(kind: string): number {
+    let count = 0;
+    for (const slot of this.slots) {
+      for (const inst of slot.instances) {
+        if (inst.kind === kind) count++;
+      }
+    }
+    return count;
   }
 
   private createRenderContext(kind: string): RenderContext {
@@ -201,18 +289,19 @@ export class RenderEngine {
     };
   }
 
-  private trackInstance(kind: string, handle: ComponentHandle): void {
-    const count = this.kindCounters.get(kind) ?? 0;
-    this.instances.push({ kind, index: count, handle });
-    this.kindCounters.set(kind, count + 1);
-  }
-
-  private disposeAll(): void {
-    for (const d of this.disposables) {
-      d.dispose();
+  disposeAll(): void {
+    for (const slot of this.slots) {
+      for (const d of slot.disposables) d.dispose();
+      slot.wrapper.remove();
     }
-    this.disposables = [];
-    this.instances = [];
-    this.kindCounters.clear();
+    this.slots = [];
+
+    for (const d of this.errorDisposables) d.dispose();
+    this.errorDisposables = [];
+    if (this.errorWrapper) {
+      this.errorWrapper.remove();
+      this.errorWrapper = null;
+    }
+    this.prevErrorHash = "";
   }
 }

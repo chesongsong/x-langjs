@@ -8,21 +8,39 @@ import { ElRadioGroup, ElRadio } from "element-plus";
 import "element-plus/es/components/radio/style/css";
 import "element-plus/es/components/radio-group/style/css";
 import { defineComponent } from "@x-lang/core";
+import type { SkeletonContext } from "@x-lang/core";
 
 interface RadioData {
   readonly options: readonly string[];
   readonly selected: string;
 }
 
+const RADIO_ARG_RE = /^radio\s*\(\s*([^,)]+)/;
+
+function inferSkeletonOptions(ctx: SkeletonContext): string[] {
+  const match = RADIO_ARG_RE.exec(ctx.content.trim());
+  if (!match) return ["", "", ""];
+
+  const varName = match[1]!.trim();
+  const data = ctx.variables[varName];
+
+  if (Array.isArray(data) && data.length > 0) {
+    return data.map((item) => String(item));
+  }
+
+  return ["", "", ""];
+}
+
 export const radio = defineComponent<RadioData>("radio", {
-  skeleton(container) {
+  skeleton(container, ctx) {
+    const options = inferSkeletonOptions(ctx);
     const wrapper = document.createElement("div");
     wrapper.className = "skeleton-radio";
     wrapper.style.display = "flex";
     wrapper.style.gap = "16px";
     wrapper.style.padding = "8px 0";
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < options.length; i++) {
       const item = document.createElement("div");
       item.style.display = "flex";
       item.style.alignItems = "center";
@@ -37,12 +55,19 @@ export const radio = defineComponent<RadioData>("radio", {
       circle.style.animationDelay = `${i * 0.1}s`;
       item.appendChild(circle);
 
-      const label = document.createElement("div");
-      label.className = "skeleton-line";
-      label.style.width = `${40 + Math.random() * 30}px`;
-      label.style.height = "14px";
-      label.style.animationDelay = `${i * 0.1}s`;
-      item.appendChild(label);
+      if (options[i]) {
+        const label = document.createElement("span");
+        label.className = "skeleton-table-label";
+        label.textContent = options[i]!;
+        item.appendChild(label);
+      } else {
+        const label = document.createElement("div");
+        label.className = "skeleton-line";
+        label.style.width = `${40 + Math.random() * 30}px`;
+        label.style.height = "14px";
+        label.style.animationDelay = `${i * 0.1}s`;
+        item.appendChild(label);
+      }
 
       wrapper.appendChild(item);
     }

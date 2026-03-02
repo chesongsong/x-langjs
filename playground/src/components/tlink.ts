@@ -1,15 +1,27 @@
 import { defineComponent } from "@x-lang/core";
+import type { SkeletonContext } from "@x-lang/core";
 
 interface TlinkData {
   readonly text: string;
   readonly url: string;
 }
 
+const TEXT_RE = /["']([^"']+)["']/;
+
+function inferSkeletonWidth(ctx: SkeletonContext): number {
+  const match = TEXT_RE.exec(ctx.content);
+  if (match?.[1]) {
+    return Math.max(60, match[1].length * 12 + 16);
+  }
+  return 100 + Math.random() * 60;
+}
+
 export const tlink = defineComponent<TlinkData>("tlink", {
-  skeleton(container) {
+  skeleton(container, ctx) {
+    const width = inferSkeletonWidth(ctx);
     const line = document.createElement("div");
     line.className = "skeleton-line";
-    line.style.width = `${100 + Math.random() * 60}px`;
+    line.style.width = `${width}px`;
     line.style.height = "14px";
     line.style.borderRadius = "2px";
 

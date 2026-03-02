@@ -7,7 +7,7 @@ import {
   ZArray,
   ZObject,
 } from "@x-lang/core";
-import type { RenderableContext } from "@x-lang/core";
+import type { RenderableContext, SkeletonContext } from "@x-lang/core";
 
 interface RenderTableColumn {
   readonly name: string;
@@ -81,6 +81,39 @@ function resolveColumns(
   return { columns };
 }
 
+const ARG_RE = /^table\s*\(\s*([^,)]+)/;
+const COL_RE = /,\s*([^,)]+)/g;
+
+function inferSkeletonShape(ctx: SkeletonContext): {
+  rows: number;
+  columns: string[];
+} {
+  const match = ARG_RE.exec(ctx.content.trim());
+  if (!match) return { rows: 4, columns: ["", "", ""] };
+
+  const varName = match[1]!.trim();
+  const data = ctx.variables[varName];
+
+  const rows = Array.isArray(data) ? data.length : 4;
+
+  const explicitCols: string[] = [];
+  let colMatch: RegExpExecArray | null;
+  const rest = ctx.content.trim().slice(match[0].length);
+  while ((colMatch = COL_RE.exec(rest)) !== null) {
+    explicitCols.push(colMatch[1]!.trim().split("=")[0]!.trim());
+  }
+
+  if (explicitCols.length > 0) {
+    return { rows, columns: explicitCols };
+  }
+
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === "object" && data[0] !== null) {
+    return { rows, columns: Object.keys(data[0] as Record<string, unknown>) };
+  }
+
+  return { rows, columns: ["", "", ""] };
+}
+
 function createShimmerLine(width: string): HTMLDivElement {
   const line = document.createElement("div");
   line.className = "skeleton-line";
@@ -89,28 +122,36 @@ function createShimmerLine(width: string): HTMLDivElement {
 }
 
 export const table = defineComponent<RenderTableData>("table", {
-  skeleton(container) {
+  skeleton(container, ctx) {
+    const { rows, columns } = inferSkeletonShape(ctx);
     const wrapper = document.createElement("div");
     wrapper.className = "skeleton-table";
 
     const header = document.createElement("div");
     header.className = "skeleton-table-header";
-    for (let c = 0; c < 3; c++) {
+    for (let c = 0; c < columns.length; c++) {
       const cell = document.createElement("div");
       cell.className = "skeleton-table-cell";
-      cell.appendChild(createShimmerLine("60%"));
+      if (columns[c]) {
+        const label = document.createElement("span");
+        label.className = "skeleton-table-label";
+        label.textContent = columns[c]!;
+        cell.appendChild(label);
+      } else {
+        cell.appendChild(createShimmerLine("60%"));
+      }
       header.appendChild(cell);
     }
     wrapper.appendChild(header);
 
-    for (let r = 0; r < 4; r++) {
+    for (let r = 0; r < rows; r++) {
       const row = document.createElement("div");
       row.className = "skeleton-table-row";
-      for (let c = 0; c < 3; c++) {
+      for (let c = 0; c < columns.length; c++) {
         const cell = document.createElement("div");
         cell.className = "skeleton-table-cell";
         cell.appendChild(createShimmerLine(`${50 + Math.random() * 40}%`));
-        cell.style.animationDelay = `${(r * 3 + c) * 0.05}s`;
+        cell.style.animationDelay = `${(r * columns.length + c) * 0.05}s`;
         row.appendChild(cell);
       }
       wrapper.appendChild(row);

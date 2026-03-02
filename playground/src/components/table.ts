@@ -8,6 +8,7 @@ import {
   ZObject,
 } from "@x-lang/core";
 import type { RenderableContext, SkeletonContext } from "@x-lang/core";
+import { renderSkeleton, ElSkeletonItem } from "./_skeleton-helper";
 
 interface RenderTableColumn {
   readonly name: string;
@@ -114,51 +115,40 @@ function inferSkeletonShape(ctx: SkeletonContext): {
   return { rows, columns: ["", "", ""] };
 }
 
-function createShimmerLine(width: string): HTMLDivElement {
-  const line = document.createElement("div");
-  line.className = "skeleton-line";
-  line.style.width = width;
-  return line;
-}
-
 export const table = defineComponent<RenderTableData>("table", {
   skeleton(container, ctx) {
     const { rows, columns } = inferSkeletonShape(ctx);
-    const wrapper = document.createElement("div");
-    wrapper.className = "skeleton-table";
-
-    const header = document.createElement("div");
-    header.className = "skeleton-table-header";
-    for (let c = 0; c < columns.length; c++) {
-      const cell = document.createElement("div");
-      cell.className = "skeleton-table-cell";
-      if (columns[c]) {
-        const label = document.createElement("span");
-        label.className = "skeleton-table-label";
-        label.textContent = columns[c]!;
-        cell.appendChild(label);
-      } else {
-        cell.appendChild(createShimmerLine("60%"));
-      }
-      header.appendChild(cell);
-    }
-    wrapper.appendChild(header);
-
-    for (let r = 0; r < rows; r++) {
-      const row = document.createElement("div");
-      row.className = "skeleton-table-row";
-      for (let c = 0; c < columns.length; c++) {
-        const cell = document.createElement("div");
-        cell.className = "skeleton-table-cell";
-        cell.appendChild(createShimmerLine(`${50 + Math.random() * 40}%`));
-        cell.style.animationDelay = `${(r * columns.length + c) * 0.05}s`;
-        row.appendChild(cell);
-      }
-      wrapper.appendChild(row);
-    }
-
-    container.appendChild(wrapper);
-    return { dispose: () => wrapper.remove() };
+    return renderSkeleton(container, () =>
+      h("div", { style: { border: "1px solid #ebeef5", borderRadius: "4px", overflow: "hidden" } }, [
+        h("div", {
+          style: {
+            display: "flex",
+            background: "#fafafa",
+            borderBottom: "2px solid #ebeef5",
+            padding: "10px 0",
+          },
+        }, columns.map((col) =>
+          h("div", { style: { flex: 1, padding: "0 14px" } }, [
+            col
+              ? h("span", { style: { fontSize: "13px", fontWeight: 600, color: "#909399" } }, col)
+              : h(ElSkeletonItem, { variant: "text", style: { width: "60%" } }),
+          ]),
+        )),
+        ...Array.from({ length: rows }, (_, r) =>
+          h("div", {
+            style: {
+              display: "flex",
+              borderBottom: r < rows - 1 ? "1px solid #ebeef5" : "none",
+              padding: "8px 0",
+            },
+          }, columns.map(() =>
+            h("div", { style: { flex: 1, padding: "0 14px" } }, [
+              h(ElSkeletonItem, { variant: "text", style: { width: `${50 + Math.random() * 40}%` } }),
+            ]),
+          )),
+        ),
+      ]),
+    );
   },
 
   setup: {

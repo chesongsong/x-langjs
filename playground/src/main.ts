@@ -6,6 +6,13 @@ import { table } from "./components/table";
 import { tlink } from "./components/tlink";
 import { button } from "./components/button";
 import { radio } from "./components/radio";
+import { alert } from "./components/alert";
+import { progress } from "./components/progress";
+import { tag } from "./components/tag";
+import { statistic } from "./components/statistic";
+import { descriptions } from "./components/descriptions";
+import { result } from "./components/result";
+import { rate } from "./components/rate";
 import { registerXLang, createXLangTheme, XLANG_ID } from "./monaco-lang";
 import "./style.css";
 
@@ -31,6 +38,13 @@ app
   .use(tlink)
   .use(button)
   .use(radio)
+  .use(alert)
+  .use(progress)
+  .use(tag)
+  .use(statistic)
+  .use(descriptions)
+  .use(result)
+  .use(rate)
   .provide({
     用户列表: [
       { 姓名: "张三", 部门: "工程部", 薪资: 25000 },
@@ -41,6 +55,9 @@ app
     公司名: "X-Lang 科技",
     部门选项: ["全部", "工程部", "设计部", "产品部"],
     当前部门: "全部",
+    公司信息: { 名称: "X-Lang 科技", 行业: "软件开发", 成立年份: 2024, 地址: "上海市浦东新区" },
+    项目进度: 78,
+    团队评分: 4.5,
   })
   .on("radio", "change", (value) => {
     if (statusEl) {
@@ -68,13 +85,63 @@ const editorContainer = document.getElementById("editor")!;
 const output = document.getElementById("output-content")!;
 const divider = document.getElementById("divider")!;
 
-const STATIC_CODE = `# x-lang Playground
+const STATIC_CODE = `# X-Lang 组件一览
 
-欢迎使用 x-lang，只有标记 \`x-lang\` 的代码块会被执行。
+本页面展示了所有可用的 x-lang 渲染组件。
 
-## 交互组件演示
+## Feedback 反馈
 
-选择部门来筛选下方表格（UI → JS 双向通信）：
+\`\`\`x-lang
+alert(title = "欢迎", description = "这是一个 info 提示，支持标题和描述。", type = "info")
+\`\`\`
+
+\`\`\`x-lang
+alert(title = "操作成功", type = "success")
+\`\`\`
+
+\`\`\`x-lang
+alert(title = "注意", description = "某些配置可能影响性能。", type = "warning")
+\`\`\`
+
+## Data 数据展示
+
+### 统计数值
+
+\`\`\`x-lang
+statistic("员工总数", 4)
+\`\`\`
+
+\`\`\`x-lang
+statistic(title = "平均薪资", value = 26250, suffix = "元")
+\`\`\`
+
+### 进度条
+
+\`\`\`x-lang
+progress(项目进度, status = "success")
+\`\`\`
+
+### 标签
+
+\`\`\`x-lang
+tag("工程部", "设计部", "产品部", type = "primary")
+\`\`\`
+
+### 评分
+
+\`\`\`x-lang
+rate(团队评分)
+\`\`\`
+
+### 描述列表
+
+\`\`\`x-lang
+descriptions(公司信息)
+\`\`\`
+
+### 表格
+
+选择部门筛选数据：
 
 \`\`\`x-lang
 radio(部门选项, 当前部门)
@@ -84,68 +151,64 @@ radio(部门选项, 当前部门)
 table(用户列表)
 \`\`\`
 
-## 执行 x-lang 代码
-
-\`\`\`x-lang
-名字 = "World"
-问候 = "Hello, " + 名字 + "!"
-问候
-\`\`\`
-
-## 普通代码块（Markdown 渲染）
-
-没有 \`x-lang\` 标记的代码块按 Markdown 原样展示：
-
-\`\`\`python
-def greet(name):
-    return f"Hello, {name}!"
-\`\`\`
-
-\`\`\`javascript
-const greet = (name) => \`Hello, \${name}!\`;
-\`\`\`
-
-## JS 注入变量 → x-lang 渲染
-
-以下变量由 JS 注入：\`公司名\`、\`用户列表\`
-
-\`\`\`x-lang
-标题 = 公司名 + " - 员工花名册"
-标题
-\`\`\`
-
-## 自定义渲染组件
+## 链接 & 按钮
 
 \`\`\`x-lang
 tlink("访问百度", "https://www.baidu.com")
 \`\`\`
 
 \`\`\`x-lang
-tlink("X-Lang GitHub", "https://github.com")
-\`\`\`
-
-## Element Plus 按钮
-
-\`\`\`x-lang
-button("点击我")
+button(text = "主要按钮", type = "primary")
 \`\`\`
 
 \`\`\`x-lang
 button(text = "成功按钮", type = "success")
 \`\`\`
 
+## 结果页
+
 \`\`\`x-lang
-button(text = "危险操作", type = "danger", size = "large", onClick = "你点击了危险按钮！")
+result(title = "页面加载完成", subtitle = "所有组件已渲染成功", type = "success")
 \`\`\`
 `;
 
-const STREAM_CONTENT = `# AI 数据分析报告
+const STREAM_CONTENT = `# X-Lang 科技 · 年度分析报告
 
-你好！我已经收到你提供的员工数据，正在为你生成分析报告。
+你好！以下是我根据你提供的数据为 **X-Lang 科技** 生成的年度分析报告。
+
+\`\`\`x-lang
+alert(title = "数据已更新", description = "以下数据截至 2026 年 Q1，已包含最新季度信息。", type = "info")
+\`\`\`
+
+## 公司概览
+
+\`\`\`x-lang
+descriptions(公司信息)
+\`\`\`
+
+## 核心指标
+
+\`\`\`x-lang
+statistic("员工总数", 4)
+\`\`\`
+
+\`\`\`x-lang
+statistic(title = "平均薪资", value = 26250, suffix = "元")
+\`\`\`
+
+\`\`\`x-lang
+progress(项目进度, status = "success")
+\`\`\`
+
+## 部门分布
+
+\`\`\`x-lang
+tag("工程部", "设计部", "产品部", type = "primary")
+\`\`\`
 
 ## 部门筛选
 
-请先选择你想查看的部门：
+请选择部门查看对应员工：
 
 \`\`\`x-lang
 radio(部门选项, 当前部门)
@@ -153,10 +216,14 @@ radio(部门选项, 当前部门)
 
 ## 员工花名册
 
-以下是完整的员工列表：
-
 \`\`\`x-lang
 table(用户列表)
+\`\`\`
+
+## 团队评价
+
+\`\`\`x-lang
+rate(团队评分)
 \`\`\`
 
 ## 快速操作
@@ -168,8 +235,6 @@ button(text = "导出报告", type = "primary")
 \`\`\`x-lang
 button(text = "发送邮件", type = "success")
 \`\`\`
-
-## 相关链接
 
 \`\`\`x-lang
 tlink("查看在线文档", "https://example.com/docs")
@@ -189,7 +254,11 @@ tlink("查看在线文档", "https://example.com/docs")
 table(用户列表, 姓名, 部门, 薪资)
 \`\`\`
 
-以上就是本次分析报告的全部内容，如有疑问请随时告诉我。
+## 总结
+
+\`\`\`x-lang
+result(title = "报告生成完毕", subtitle = "已为你分析 4 名员工数据，如有疑问请随时告诉我。", type = "success")
+\`\`\`
 `;
 
 const editor = monaco.editor.create(editorContainer, {
@@ -256,7 +325,6 @@ const streamStatus = document.getElementById("stream-status")!;
 let streaming = false;
 let streamTimer: ReturnType<typeof setTimeout> | null = null;
 let streamIndex = 0;
-let renderRaf = 0;
 
 function startStream(): void {
   streaming = true;
@@ -278,7 +346,6 @@ function stopStream(): void {
     clearTimeout(streamTimer);
     streamTimer = null;
   }
-  cancelAnimationFrame(renderRaf);
   finishStream();
 }
 

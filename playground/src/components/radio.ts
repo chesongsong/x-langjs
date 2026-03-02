@@ -9,6 +9,7 @@ import "element-plus/es/components/radio/style/css";
 import "element-plus/es/components/radio-group/style/css";
 import { defineComponent } from "@x-lang/core";
 import type { SkeletonContext } from "@x-lang/core";
+import { renderSkeleton, ElSkeletonItem } from "./_skeleton-helper";
 
 interface RadioData {
   readonly options: readonly string[];
@@ -34,46 +35,18 @@ function inferSkeletonOptions(ctx: SkeletonContext): string[] {
 export const radio = defineComponent<RadioData>("radio", {
   skeleton(container, ctx) {
     const options = inferSkeletonOptions(ctx);
-    const wrapper = document.createElement("div");
-    wrapper.className = "skeleton-radio";
-    wrapper.style.display = "flex";
-    wrapper.style.gap = "16px";
-    wrapper.style.padding = "8px 0";
-
-    for (let i = 0; i < options.length; i++) {
-      const item = document.createElement("div");
-      item.style.display = "flex";
-      item.style.alignItems = "center";
-      item.style.gap = "6px";
-
-      const circle = document.createElement("div");
-      circle.className = "skeleton-line";
-      circle.style.width = "16px";
-      circle.style.height = "16px";
-      circle.style.borderRadius = "50%";
-      circle.style.flexShrink = "0";
-      circle.style.animationDelay = `${i * 0.1}s`;
-      item.appendChild(circle);
-
-      if (options[i]) {
-        const label = document.createElement("span");
-        label.className = "skeleton-table-label";
-        label.textContent = options[i]!;
-        item.appendChild(label);
-      } else {
-        const label = document.createElement("div");
-        label.className = "skeleton-line";
-        label.style.width = `${40 + Math.random() * 30}px`;
-        label.style.height = "14px";
-        label.style.animationDelay = `${i * 0.1}s`;
-        item.appendChild(label);
-      }
-
-      wrapper.appendChild(item);
-    }
-
-    container.appendChild(wrapper);
-    return { dispose: () => wrapper.remove() };
+    return renderSkeleton(container, () =>
+      h("div", { style: { display: "flex", gap: "20px", padding: "8px 0" } },
+        options.map((opt) =>
+          h("div", { style: { display: "flex", alignItems: "center", gap: "6px" } }, [
+            h(ElSkeletonItem, { variant: "circle", style: { width: "16px", height: "16px" } }),
+            opt
+              ? h("span", { style: { fontSize: "14px", color: "#909399" } }, opt)
+              : h(ElSkeletonItem, { variant: "text", style: { width: "48px" } }),
+          ]),
+        ),
+      ),
+    );
   },
 
   setup: (args) => ({

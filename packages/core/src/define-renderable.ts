@@ -117,8 +117,8 @@ class AdvancedRenderableBuiltin implements BuiltinFunction {
  *
  * Simple mode — handler receives evaluated, unboxed JS values:
  * ```ts
- * defineRenderable("tlink", (args, named) => ({
- *   text: args[0], url: args[1],
+ * defineRenderable("button", (args, named) => ({
+ *   text: args[0], type: named.type ?? "primary",
  * }));
  * ```
  *

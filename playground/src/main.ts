@@ -3,7 +3,6 @@ import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { XLangApp } from "@x-lang/core";
 import { ElementComponentFactory } from "./renderers/element-factory";
 import { table } from "./components/table/index";
-import { tlink } from "./components/tlink/index";
 import { button } from "./components/button/index";
 import { radio } from "./components/radio/index";
 import { alert } from "./components/alert/index";
@@ -35,7 +34,6 @@ const app = new XLangApp(new ElementComponentFactory());
 
 app
   .use(table)
-  .use(tlink)
   .use(button)
   .use(radio)
   .use(alert)
@@ -151,11 +149,7 @@ radio(部门选项, 当前部门)
 table(用户列表)
 \`\`\`
 
-## 链接 & 按钮
-
-\`\`\`x-lang
-tlink("访问百度", "https://www.baidu.com")
-\`\`\`
+## 按钮
 
 \`\`\`x-lang
 button(text = "主要按钮", type = "primary")
@@ -234,10 +228,6 @@ button(text = "导出报告", type = "primary")
 
 \`\`\`x-lang
 button(text = "发送邮件", type = "success")
-\`\`\`
-
-\`\`\`x-lang
-tlink("查看在线文档", "https://example.com/docs")
 \`\`\`
 
 ## 代码演示

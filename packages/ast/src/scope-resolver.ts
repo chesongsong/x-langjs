@@ -22,7 +22,7 @@ export class ScopeResolver {
   resolve(program: Program): Program {
     return {
       ...program,
-      body: program.body.map((scope) => this.resolveScopeBlock(scope)),
+      body: program.body.map((scope: ScopeBlock) => this.resolveScopeBlock(scope)),
     };
   }
 
@@ -181,7 +181,7 @@ export class ScopeResolver {
         return {
           ...expr,
           callee: this.resolveExpression(expr.callee),
-          arguments: expr.arguments.map((a) => this.resolveCallArgument(a)),
+          arguments: expr.arguments.map((a: CallArgument) => this.resolveCallArgument(a)),
         };
       case "MemberExpression":
         return {
@@ -197,7 +197,7 @@ export class ScopeResolver {
       case "ArrayExpression":
         return {
           ...expr,
-          elements: expr.elements.map((e) => this.resolveExpression(e)),
+          elements: expr.elements.map((e: Expression) => this.resolveExpression(e)),
         };
       case "ObjectExpression":
         return {

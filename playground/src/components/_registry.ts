@@ -6,7 +6,6 @@ import { defineVueComponent } from "./_define-vue-component.js";
 import {
   buttonSetup,
   alertSetup,
-  radioSetup,
   progressSetup,
   tagSetup,
   statisticSetup,
@@ -14,6 +13,7 @@ import {
   resultSetup,
   rateSetup,
   cardSetup,
+  orderCardSetup,
   tableSetup,
   type RenderTableData,
 } from "./_setups.js";
@@ -21,7 +21,6 @@ import {
 import ElementButtonView from "./element/ButtonView.vue";
 import ElementAlertView from "./element/AlertView.vue";
 import ElementTableView from "./element/TableView.vue";
-import ElementRadioView from "./element/RadioView.vue";
 import ElementProgressView from "./element/ProgressView.vue";
 import ElementTagView from "./element/TagView.vue";
 import ElementStatisticView from "./element/StatisticView.vue";
@@ -29,11 +28,11 @@ import ElementDescriptionsView from "./element/DescriptionsView.vue";
 import ElementResultView from "./element/ResultView.vue";
 import ElementRateView from "./element/RateView.vue";
 import ElementCardView from "./element/CardView.vue";
+import ElementOrderCardView from "./element/OrderCardView.vue";
 
 import ArcoButtonView from "./arco/ButtonView.vue";
 import ArcoAlertView from "./arco/AlertView.vue";
 import ArcoTableView from "./arco/TableView.vue";
-import ArcoRadioView from "./arco/RadioView.vue";
 import ArcoProgressView from "./arco/ProgressView.vue";
 import ArcoTagView from "./arco/TagView.vue";
 import ArcoStatisticView from "./arco/StatisticView.vue";
@@ -41,11 +40,11 @@ import ArcoDescriptionsView from "./arco/DescriptionsView.vue";
 import ArcoResultView from "./arco/ResultView.vue";
 import ArcoRateView from "./arco/RateView.vue";
 import ArcoCardView from "./arco/CardView.vue";
+import ArcoOrderCardView from "./arco/OrderCardView.vue";
 
 import AntdButtonView from "./antd/ButtonView.vue";
 import AntdAlertView from "./antd/AlertView.vue";
 import AntdTableView from "./antd/TableView.vue";
-import AntdRadioView from "./antd/RadioView.vue";
 import AntdProgressView from "./antd/ProgressView.vue";
 import AntdTagView from "./antd/TagView.vue";
 import AntdStatisticView from "./antd/StatisticView.vue";
@@ -53,11 +52,11 @@ import AntdDescriptionsView from "./antd/DescriptionsView.vue";
 import AntdResultView from "./antd/ResultView.vue";
 import AntdRateView from "./antd/RateView.vue";
 import AntdCardView from "./antd/CardView.vue";
+import AntdOrderCardView from "./antd/OrderCardView.vue";
 
 import ButtonSkeleton from "./skeletons/ButtonSkeleton.vue";
 import AlertSkeleton from "./skeletons/AlertSkeleton.vue";
 import TableSkeleton from "./skeletons/TableSkeleton.vue";
-import RadioSkeleton from "./skeletons/RadioSkeleton.vue";
 import ProgressSkeleton from "./skeletons/ProgressSkeleton.vue";
 import TagSkeleton from "./skeletons/TagSkeleton.vue";
 import StatisticSkeleton from "./skeletons/StatisticSkeleton.vue";
@@ -65,6 +64,7 @@ import DescriptionsSkeleton from "./skeletons/DescriptionsSkeleton.vue";
 import ResultSkeleton from "./skeletons/ResultSkeleton.vue";
 import RateSkeleton from "./skeletons/RateSkeleton.vue";
 import CardSkeleton from "./skeletons/CardSkeleton.vue";
+import OrderCardSkeleton from "./skeletons/OrderCardSkeleton.vue";
 
 export type UILib = "element" | "arco" | "antd";
 
@@ -72,7 +72,6 @@ interface ViewMap {
   button: typeof ElementButtonView;
   alert: typeof ElementAlertView;
   table: typeof ElementTableView;
-  radio: typeof ElementRadioView;
   progress: typeof ElementProgressView;
   tag: typeof ElementTagView;
   statistic: typeof ElementStatisticView;
@@ -80,13 +79,13 @@ interface ViewMap {
   result: typeof ElementResultView;
   rate: typeof ElementRateView;
   card: typeof ElementCardView;
+  orderCard: typeof ElementOrderCardView;
 }
 
 const elementViews: ViewMap = {
   button: ElementButtonView,
   alert: ElementAlertView,
   table: ElementTableView,
-  radio: ElementRadioView,
   progress: ElementProgressView,
   tag: ElementTagView,
   statistic: ElementStatisticView,
@@ -94,13 +93,13 @@ const elementViews: ViewMap = {
   result: ElementResultView,
   rate: ElementRateView,
   card: ElementCardView,
+  orderCard: ElementOrderCardView,
 };
 
 const arcoViews: ViewMap = {
   button: ArcoButtonView,
   alert: ArcoAlertView,
   table: ArcoTableView,
-  radio: ArcoRadioView,
   progress: ArcoProgressView,
   tag: ArcoTagView,
   statistic: ArcoStatisticView,
@@ -108,13 +107,13 @@ const arcoViews: ViewMap = {
   result: ArcoResultView,
   rate: ArcoRateView,
   card: ArcoCardView,
+  orderCard: ArcoOrderCardView,
 };
 
 const antdViews: ViewMap = {
   button: AntdButtonView,
   alert: AntdAlertView,
   table: AntdTableView,
-  radio: AntdRadioView,
   progress: AntdProgressView,
   tag: AntdTagView,
   statistic: AntdStatisticView,
@@ -122,6 +121,7 @@ const antdViews: ViewMap = {
   result: AntdResultView,
   rate: AntdRateView,
   card: AntdCardView,
+  orderCard: AntdOrderCardView,
 };
 
 const viewMap: Record<UILib, ViewMap> = {
@@ -134,7 +134,6 @@ const skeletonMap = {
   button: ButtonSkeleton,
   alert: AlertSkeleton,
   table: TableSkeleton,
-  radio: RadioSkeleton,
   progress: ProgressSkeleton,
   tag: TagSkeleton,
   statistic: StatisticSkeleton,
@@ -142,6 +141,7 @@ const skeletonMap = {
   result: ResultSkeleton,
   rate: RateSkeleton,
   card: CardSkeleton,
+  orderCard: OrderCardSkeleton,
 };
 
 function createTableDef(
@@ -193,11 +193,6 @@ export function createComponents(lib: UILib): ComponentDefinition[] {
       component: views.alert,
       skeleton: skeletonMap.alert,
     }),
-    defineVueComponent("radio", {
-      setup: radioSetup,
-      component: views.radio,
-      skeleton: skeletonMap.radio,
-    }),
     defineVueComponent("progress", {
       setup: progressSetup,
       component: views.progress,
@@ -232,6 +227,11 @@ export function createComponents(lib: UILib): ComponentDefinition[] {
       setup: cardSetup,
       component: views.card,
       skeleton: skeletonMap.card,
+    }),
+    defineVueComponent("OrderCard", {
+      setup: orderCardSetup,
+      component: views.orderCard,
+      skeleton: skeletonMap.orderCard,
     }),
     createTableDef(views.table, skeletonMap.table),
   ];

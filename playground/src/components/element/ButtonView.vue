@@ -7,8 +7,9 @@
 </template>
 
 <script setup lang="ts">
-import { ElButton } from "element-plus";
+import { ElButton, ElMessage } from "element-plus";
 import "element-plus/es/components/button/style/css";
+import "element-plus/es/components/message/style/css";
 
 const props = defineProps<{
   text: string;
@@ -19,7 +20,7 @@ const props = defineProps<{
 
 function handleClick() {
   if (props.onClick) {
-    alert(props.onClick);
+    ElMessage.success(props.onClick);
   }
 }
 </script>

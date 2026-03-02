@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { Button as AButton } from "ant-design-vue";
+import { Button as AButton, message } from "ant-design-vue";
 
 const props = defineProps<{
   text: string;
@@ -15,6 +15,8 @@ const props = defineProps<{
 }>();
 
 function handleClick() {
-  if (props.onClick) alert(props.onClick);
+  if (props.onClick) {
+    message.success(props.onClick);
+  }
 }
 </script>

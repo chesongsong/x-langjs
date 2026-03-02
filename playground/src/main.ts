@@ -4,6 +4,7 @@ import { XLangApp } from "@x-lang/core";
 import { ElementComponentFactory } from "./renderers/element-factory";
 import { createComponents, type UILib } from "./components/_registry";
 import { registerXLang, createXLangTheme, XLANG_ID } from "./monaco-lang";
+import "@arco-design/web-vue/dist/arco.css";
 import "./style.css";
 
 self.MonacoEnvironment = {
@@ -19,8 +20,6 @@ createXLangTheme();
 // 1. App / components / data
 // ---------------------------------------------------------------------------
 
-const statusEl = document.getElementById("event-status");
-
 const sharedData = {
   用户列表: [
     { 姓名: "张三", 部门: "工程部", 薪资: 25000 },
@@ -29,11 +28,20 @@ const sharedData = {
     { 姓名: "赵六", 部门: "工程部", 薪资: 30000 },
   ],
   公司名: "X-Lang 科技",
-  部门选项: ["全部", "工程部", "设计部", "产品部"],
-  当前部门: "全部",
   公司信息: { 名称: "X-Lang 科技", 行业: "软件开发", 成立年份: 2024, 地址: "上海市浦东新区" },
   项目进度: 78,
   团队评分: 4.5,
+  订单: {
+    订单号: "O202402280001",
+    状态: "已支付",
+    金额: 299,
+    下单时间: "2026-02-28 14:30",
+    商品列表: [
+      { 商品名: "X-Lang 入门教程", 数量: 1, 单价: 99 },
+      { 商品名: "组件开发实战", 数量: 2, 单价: 100 },
+    ],
+    收货地址: "上海市浦东新区张江镇 XX 路 100 号",
+  },
 };
 
 const appRef: { current: XLangApp } = { current: null! };
@@ -44,21 +52,6 @@ function buildApp(lib: UILib): XLangApp {
     newApp.use(comp);
   }
   newApp.provide(sharedData);
-  newApp.on("radio", "change", (value) => {
-    if (statusEl) {
-      statusEl.textContent = `当前选择：${value}`;
-    }
-    const filter = value as string;
-    const all = [
-      { 姓名: "张三", 部门: "工程部", 薪资: 25000 },
-      { 姓名: "李四", 部门: "设计部", 薪资: 22000 },
-      { 姓名: "王五", 部门: "产品部", 薪资: 28000 },
-      { 姓名: "赵六", 部门: "工程部", 薪资: 30000 },
-    ];
-    const filtered = filter === "全部" ? all : all.filter((u) => u.部门 === filter);
-    appRef.current.provide({ 用户列表: filtered, 当前部门: filter });
-    requestAnimationFrame(() => appRef.current.run(editor.getValue(), output));
-  });
   return newApp;
 }
 
@@ -128,12 +121,6 @@ descriptions(公司信息)
 
 ### 表格
 
-选择部门筛选数据：
-
-\`\`\`x-lang
-radio(部门选项, 当前部门)
-\`\`\`
-
 \`\`\`x-lang
 table(用户列表)
 \`\`\`
@@ -148,10 +135,20 @@ button(text = "主要按钮", type = "primary")
 button(text = "成功按钮", type = "success")
 \`\`\`
 
+\`\`\`x-lang
+button(text = "点我提示", onClick = "操作成功！")
+\`\`\`
+
 ## 卡片
 
 \`\`\`x-lang
 card(title = "项目概要", content = "本季度共完成 3 个里程碑，团队整体表现优异。")
+\`\`\`
+
+## 订单详情卡
+
+\`\`\`x-lang
+OrderCard(订单)
 \`\`\`
 
 ## 结果页
@@ -195,14 +192,6 @@ progress(项目进度, status = "success")
 tag("工程部", "设计部", "产品部", type = "primary")
 \`\`\`
 
-## 部门筛选
-
-请选择部门查看对应员工：
-
-\`\`\`x-lang
-radio(部门选项, 当前部门)
-\`\`\`
-
 ## 员工花名册
 
 \`\`\`x-lang
@@ -227,6 +216,12 @@ button(text = "发送邮件", type = "success")
 
 \`\`\`x-lang
 card(title = "项目概要", content = "本季度共完成 3 个里程碑，团队整体表现优异。")
+\`\`\`
+
+## 订单详情
+
+\`\`\`x-lang
+OrderCard(订单)
 \`\`\`
 
 ## 代码演示
@@ -428,6 +423,7 @@ function switchLib(lib: UILib) {
     const el = btn as HTMLButtonElement;
     el.classList.toggle("active", el.dataset.lib === lib);
   });
+  output.innerHTML = "";
   execute();
 }
 

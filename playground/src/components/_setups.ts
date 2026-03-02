@@ -41,20 +41,6 @@ export const alertSetup: SimpleSetup<AlertData> = (args, named) => {
 };
 
 // ---------------------------------------------------------------------------
-// Radio
-// ---------------------------------------------------------------------------
-
-export interface RadioData {
-  readonly options: readonly string[];
-  readonly selected: string;
-}
-
-export const radioSetup: SimpleSetup<RadioData> = (args) => ({
-  options: args[0] as string[],
-  selected: (args[1] as string) ?? "",
-});
-
-// ---------------------------------------------------------------------------
 // Progress
 // ---------------------------------------------------------------------------
 
@@ -197,7 +183,7 @@ export const rateSetup: SimpleSetup<RateData> = (args, named) => ({
 });
 
 // ---------------------------------------------------------------------------
-// Card (NEW)
+// Card
 // ---------------------------------------------------------------------------
 
 export interface CardData {
@@ -211,6 +197,74 @@ export const cardSetup: SimpleSetup<CardData> = (args, named) => ({
   content: (named.content as string) ?? (args[1] as string) ?? "",
   shadow: (named.shadow as string) ?? "hover",
 });
+
+// ---------------------------------------------------------------------------
+// OrderCard（订单详情卡）
+// ---------------------------------------------------------------------------
+
+export interface OrderItem {
+  readonly name: string;
+  readonly quantity: number;
+  readonly price: number;
+}
+
+export interface OrderCardData {
+  readonly orderId: string;
+  readonly status: string;
+  readonly amount: number;
+  readonly orderTime: string;
+  readonly items: readonly OrderItem[];
+  readonly address: string;
+}
+
+function parseOrderItem(raw: unknown): OrderItem {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const o = raw as Record<string, unknown>;
+    return {
+      name: String(o.name ?? o.商品名 ?? ""),
+      quantity: Number(o.quantity ?? o.数量 ?? 1),
+      price: Number(o.price ?? o.单价 ?? 0),
+    };
+  }
+  return { name: String(raw), quantity: 1, price: 0 };
+}
+
+export const orderCardSetup: SimpleSetup<OrderCardData> = (args, named) => {
+  const first = args[0];
+  let orderId = (named.订单号 as string) ?? (named.orderId as string) ?? "";
+  let status = (named.状态 as string) ?? (named.status as string) ?? "";
+  let amount = (named.金额 as number) ?? (named.amount as number) ?? 0;
+  let orderTime = (named.下单时间 as string) ?? (named.orderTime as string) ?? "";
+  let items: OrderItem[] = [];
+  let address = (named.收货地址 as string) ?? (named.address as string) ?? "";
+
+  if (first && typeof first === "object" && !Array.isArray(first)) {
+    const obj = first as Record<string, unknown>;
+    orderId = String(obj.订单号 ?? obj.orderId ?? orderId);
+    status = String(obj.状态 ?? obj.status ?? status);
+    amount = Number(obj.金额 ?? obj.amount ?? amount);
+    orderTime = String(obj.下单时间 ?? obj.orderTime ?? orderTime);
+    address = String(obj.收货地址 ?? obj.address ?? address);
+    const rawItems = obj.商品列表 ?? obj.items;
+    if (Array.isArray(rawItems)) {
+      items = rawItems.map(parseOrderItem);
+    }
+  }
+
+  if (!items.length && (named.商品列表 || named.items)) {
+    const raw = named.商品列表 ?? named.items;
+    items = Array.isArray(raw) ? raw.map(parseOrderItem) : [];
+  }
+
+  return {
+    orderId: orderId || "—",
+    status: status || "—",
+    amount,
+    orderTime: orderTime || "—",
+    items,
+    address: address || "—",
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Table (Advanced Setup)

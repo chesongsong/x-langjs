@@ -32,6 +32,7 @@ import { XNull } from "./values/null.js";
 import { XArray } from "./values/array.js";
 import { XObject } from "./values/object.js";
 import { XFunction } from "./values/function.js";
+import { XRenderable } from "./renderables/base.js";
 import { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";
 import type { ScopeResult } from "./segments.js";
 import { BuiltinRegistry } from "./builtins/registry.js";
@@ -77,10 +78,14 @@ export class Interpreter implements Evaluator {
   ): Xvalue {
     const env = parentEnv ? new Environment(parentEnv) : new Environment();
     let lastValue: Xvalue = XNull.instance;
+    const renderables: XRenderable[] = [];
     for (const stmt of scope.body) {
       lastValue = this.executeStatement(stmt, env);
+      if (lastValue instanceof XRenderable) {
+        renderables.push(lastValue);
+      }
     }
-    return lastValue;
+    return renderables.length > 0 ? new XArray(renderables) : lastValue;
   }
 
   // 执行单条语句
@@ -226,10 +231,14 @@ export class Interpreter implements Evaluator {
   // 在指定环境中执行语句块
   private executeBlockInEnv(block: BlockStatement, env: Environment): Xvalue {
     let lastValue: Xvalue = XNull.instance;
+    const renderables: XRenderable[] = [];
     for (const stmt of block.body) {
       lastValue = this.executeStatement(stmt, env);
+      if (lastValue instanceof XRenderable) {
+        renderables.push(lastValue);
+      }
     }
-    return lastValue;
+    return renderables.length > 0 ? new XArray(renderables) : lastValue;
   }
 
   // -------------------------------------------------------------------------

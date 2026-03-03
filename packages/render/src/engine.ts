@@ -1,5 +1,5 @@
 import type { OutputSegment } from "@x-lang/interpreter";
-import { Xvalue, XRenderable } from "@x-lang/interpreter";
+import { Xvalue, XRenderable, XArray } from "@x-lang/interpreter";
 import type {
   ComponentFactory,
   ComponentHandle,
@@ -248,6 +248,34 @@ export class RenderEngine {
     }
 
     const value = result.value;
+
+    if (value instanceof XArray) {
+      const renderables = value.elements.filter(
+        (item) => item instanceof XRenderable,
+      ) as XRenderable[];
+      if (renderables.length > 0 && renderables.length === value.elements.length) {
+        slot.wrapper.className = "render-segment render-scope";
+        for (const renderable of renderables) {
+          const renderer = this.factory.createRenderer(renderable.kind);
+          if (!renderer) continue;
+          const itemWrapper = document.createElement("div");
+          itemWrapper.className = `render-segment render-${renderable.kind}`;
+          slot.wrapper.appendChild(itemWrapper);
+
+          const kind = renderable.kind;
+          const ctx = this.createRenderContext(kind);
+          const handle = renderer.render(renderable.renderData, itemWrapper, ctx);
+
+          slot.disposables.push(handle);
+          slot.instances.push({
+            kind,
+            index: this.countKind(kind),
+            handle: handle as ComponentHandle,
+          });
+        }
+        return;
+      }
+    }
 
     if (value instanceof XRenderable) {
       const renderer = this.factory.createRenderer(value.kind);

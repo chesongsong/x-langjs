@@ -1,6 +1,7 @@
 import type { SimpleSetup, AdvancedSetup, RenderableContext } from "@x-lang/core";
 import { XArray, XObject } from "@x-lang/core";
 
+// Normalize to a safe string for display.
 function coerceText(value: unknown): string {
   if (value && typeof value === "object" && "toString" in value) {
     return (value as { toString: () => string }).toString();
@@ -8,12 +9,14 @@ function coerceText(value: unknown): string {
   return String(value ?? "");
 }
 
+// Normalize to a plain array (unwrap XArray when needed).
 function coerceArray(value: unknown): unknown[] {
   if (value instanceof XArray) return value.elements;
   if (Array.isArray(value)) return value;
   return [];
 }
 
+// Normalize to a plain object (unwrap XObject when needed).
 function coerceObject(value: unknown): Record<string, unknown> | null {
   if (value instanceof XObject) return value.entries;
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -22,6 +25,7 @@ function coerceObject(value: unknown): Record<string, unknown> | null {
   return null;
 }
 
+// Deep-convert X* wrapper values into plain JS values.
 function toPlain(value: unknown): unknown {
   if (value instanceof XArray) {
     return value.elements.map((item) => toPlain(item));
@@ -275,6 +279,145 @@ export const formSetup: SimpleSetup<FormData> = (args, named) => {
     resetText: (named.resetText as string) ?? "重置",
     labelWidth: (named.labelWidth as string | number) ?? 120,
     column: (named.column as number) ?? 2,
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Hotel Confirm Card
+// ---------------------------------------------------------------------------
+
+export interface HotelConfirmData {
+  readonly hotelNameTitle: string;
+  readonly hotelName: string;
+  readonly roomTitle: string;
+  readonly roomItems: readonly string[];
+  readonly dateTitle: string;
+  readonly dateValue: string;
+  readonly actionTitle: string;
+  readonly actionItems: readonly string[];
+  readonly tip: string;
+  readonly buttonText: string;
+}
+
+// Normalize list entries into displayable text lines.
+function coerceLines(value: unknown): string[] {
+  return coerceArray(value).map((item) => {
+    const plain = toPlain(item);
+    if (plain && typeof plain === "object") {
+      const obj = plain as Record<string, unknown>;
+      const label = coerceText(obj.label ?? obj.标题 ?? obj.name ?? "");
+      const content = coerceText(obj.value ?? obj.内容 ?? obj.text ?? "");
+      if (label && content) return `${label}：${content}`;
+      if (label) return label;
+      if (content) return content;
+    }
+    return coerceText(item);
+  });
+}
+
+export const hotelConfirmSetup: SimpleSetup<HotelConfirmData> = (args, named) => {
+  const source = toPlain(args[0]);
+  const hotelNameTitle = coerceText(
+    (named.hotelNameTitle as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).hotelNameTitle
+        : undefined) ??
+      "酒店名称",
+  );
+  const hotelName = coerceText(
+    (named.hotelName as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).hotelName
+        : undefined) ??
+      "测试酒店123456",
+  );
+  const roomTitle = coerceText(
+    (named.roomTitle as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).roomTitle
+        : undefined) ??
+      "售卖房型及产品",
+  );
+  const roomItems =
+    coerceLines(
+      (named.roomItems as unknown) ??
+        (source && typeof source === "object"
+          ? (source as Record<string, unknown>).roomItems
+          : undefined),
+    ).length > 0
+      ? coerceLines(
+          (named.roomItems as unknown) ??
+            (source && typeof source === "object"
+              ? (source as Record<string, unknown>).roomItems
+              : undefined),
+        )
+      : ["家庭房", "家庭房-双早"];
+  const dateTitle = coerceText(
+    (named.dateTitle as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).dateTitle
+        : undefined) ??
+      "日期",
+  );
+  const dateValue = coerceText(
+    (named.dateValue as string) ??
+      (named.date as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).dateValue ?? (source as Record<string, unknown>).date
+        : undefined) ??
+      "2026年2月12日",
+  );
+  const actionTitle = coerceText(
+    (named.actionTitle as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).actionTitle
+        : undefined) ??
+      "操作内容",
+  );
+  const actionItems =
+    coerceLines(
+      (named.actionItems as unknown) ??
+        (named.actions as unknown) ??
+        (source && typeof source === "object"
+          ? (source as Record<string, unknown>).actionItems ??
+            (source as Record<string, unknown>).actions
+          : undefined),
+    ).length > 0
+      ? coerceLines(
+          (named.actionItems as unknown) ??
+            (named.actions as unknown) ??
+            (source && typeof source === "object"
+              ? (source as Record<string, unknown>).actionItems ??
+                (source as Record<string, unknown>).actions
+              : undefined),
+        )
+      : ["房态：打开", "添加保留房：统一设置为 2 间", "保留房售完后：直接关房"];
+  const tip = coerceText(
+    (named.tip as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).tip
+        : undefined) ??
+      "以上修改内容确认无误后可点击 确认提交按钮",
+  );
+  const buttonText = coerceText(
+    (named.buttonText as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).buttonText
+        : undefined) ??
+      "确认提交",
+  );
+
+  return {
+    hotelNameTitle,
+    hotelName,
+    roomTitle,
+    roomItems,
+    dateTitle,
+    dateValue,
+    actionTitle,
+    actionItems,
+    tip,
+    buttonText,
   };
 };
 

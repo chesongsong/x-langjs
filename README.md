@@ -167,6 +167,7 @@ import { createLexer, parse as parseCST, tokenize as tokenizeRaw, locationFromTo
 | **button** | 按钮 | `button(text = "确定", type = "primary", size = "default" \| "small" \| "large", onClick = "提示文案")` |
 | **card** | 卡片 | `card(title = "标题", content = "内容", shadow = "hover" \| "always" \| "never")` |
 | **ordercard** | 订单详情卡 | `ordercard(订单)` 或 `ordercard(订单号 = "…", 状态 = "已支付", 金额 = 99, …)` |
+| **hotelconfirm** | 酒店变更确认卡 | `hotelconfirm(hotelName = "测试酒店123456", roomItems = [...], dateValue = "2026年2月12日", actionItems = [...])` |
 | **form** | 复杂表单 | `form(title = "立项表单", fields = 字段数组, column = 2)` |
 | **result** | 结果页 | `result(title = "完成", subtitle = "说明", type = "success" \| "info" \| "error" \| "warning")` |
 | **drawer** | 抽屉 | `drawer(title = "筛选", content = "…", placement = "right", size = "320px")` |

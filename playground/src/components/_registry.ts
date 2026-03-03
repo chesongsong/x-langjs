@@ -14,6 +14,7 @@ import {
   rateSetup,
   cardSetup,
   orderCardSetup,
+  hotelConfirmSetup,
   tableSetup,
   formSetup,
   drawerSetup,
@@ -43,6 +44,7 @@ import ElementResultView from "./element/ResultView.vue";
 import ElementRateView from "./element/RateView.vue";
 import ElementCardView from "./element/CardView.vue";
 import ElementOrderCardView from "./element/OrderCardView.vue";
+import ElementHotelConfirmView from "./element/HotelConfirmView.vue";
 import ElementFormView from "./element/FormView.vue";
 import ElementDrawerView from "./element/DrawerView.vue";
 import ElementTimelineView from "./element/TimelineView.vue";
@@ -60,6 +62,7 @@ import ArcoResultView from "./arco/ResultView.vue";
 import ArcoRateView from "./arco/RateView.vue";
 import ArcoCardView from "./arco/CardView.vue";
 import ArcoOrderCardView from "./arco/OrderCardView.vue";
+import ArcoHotelConfirmView from "./arco/HotelConfirmView.vue";
 import ArcoFormView from "./arco/FormView.vue";
 import ArcoDrawerView from "./arco/DrawerView.vue";
 import ArcoTimelineView from "./arco/TimelineView.vue";
@@ -77,6 +80,7 @@ import AntdResultView from "./antd/ResultView.vue";
 import AntdRateView from "./antd/RateView.vue";
 import AntdCardView from "./antd/CardView.vue";
 import AntdOrderCardView from "./antd/OrderCardView.vue";
+import AntdHotelConfirmView from "./antd/HotelConfirmView.vue";
 import AntdFormView from "./antd/FormView.vue";
 import AntdDrawerView from "./antd/DrawerView.vue";
 import AntdTimelineView from "./antd/TimelineView.vue";
@@ -109,6 +113,7 @@ interface ViewMap {
   rate: typeof ElementRateView;
   card: typeof ElementCardView;
   orderCard: typeof ElementOrderCardView;
+  hotelConfirm: typeof ElementHotelConfirmView;
   form: typeof ElementFormView;
   drawer: typeof ElementDrawerView;
   timeline: typeof ElementTimelineView;
@@ -128,6 +133,7 @@ const elementViews: ViewMap = {
   rate: ElementRateView,
   card: ElementCardView,
   orderCard: ElementOrderCardView,
+  hotelConfirm: ElementHotelConfirmView,
   form: ElementFormView,
   drawer: ElementDrawerView,
   timeline: ElementTimelineView,
@@ -147,6 +153,7 @@ const arcoViews: ViewMap = {
   rate: ArcoRateView,
   card: ArcoCardView,
   orderCard: ArcoOrderCardView,
+  hotelConfirm: ArcoHotelConfirmView,
   form: ArcoFormView,
   drawer: ArcoDrawerView,
   timeline: ArcoTimelineView,
@@ -166,6 +173,7 @@ const antdViews: ViewMap = {
   rate: AntdRateView,
   card: AntdCardView,
   orderCard: AntdOrderCardView,
+  hotelConfirm: AntdHotelConfirmView,
   form: AntdFormView,
   drawer: AntdDrawerView,
   timeline: AntdTimelineView,
@@ -281,6 +289,10 @@ export function createComponents(lib: UILib): ComponentDefinition[] {
       setup: orderCardSetup,
       component: views.orderCard,
       skeleton: skeletonMap.orderCard,
+    }),
+    defineVueComponent("hotelconfirm", {
+      setup: hotelConfirmSetup,
+      component: views.hotelConfirm,
     }),
     defineVueComponent("form", {
       setup: formSetup,

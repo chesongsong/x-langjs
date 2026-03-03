@@ -65,6 +65,7 @@ function tokenLoc(token: Token): SourceLocation {
 }
 
 export class ASTBuilder {
+  // 构建程序入口 AST
   buildProgram(ctx: ParserRuleContext): Program {
     const scopes: ScopeBlock[] = [];
     for (const child of ctx.children ?? []) {
@@ -82,6 +83,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建顶层代码块
   private buildScopeBlock(ctx: ParserRuleContext): ScopeBlock {
     const stmts: Statement[] = [];
     for (const child of ctx.children ?? []) {
@@ -97,6 +99,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建语句节点
   private buildStatement(ctx: ParserRuleContext): Statement | null {
     const ruleIndex = ctx.ruleIndex;
 
@@ -137,6 +140,7 @@ export class ASTBuilder {
     return null;
   }
 
+  // 构建函数声明
   private buildFunctionDeclaration(ctx: ParserRuleContext): FunctionDeclaration {
     const nameToken = ctx.getToken(XLangParser.IDENTIFIER, 0);
     const name = nameToken?.getText() ?? "";
@@ -155,6 +159,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建 if/else 语句
   private buildIfStatement(ctx: ParserRuleContext): IfStatement {
     const exprCtx = this.findRuleChild(ctx, XLangParser.RULE_expression)!;
     const blocks = this.findAllRuleChildren(ctx, XLangParser.RULE_block);
@@ -176,6 +181,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建 while 语句
   private buildWhileStatement(ctx: ParserRuleContext): WhileStatement {
     const exprCtx = this.findRuleChild(ctx, XLangParser.RULE_expression)!;
     const blockCtx = this.findRuleChild(ctx, XLangParser.RULE_block)!;
@@ -188,6 +194,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建 for 语句
   private buildForStatement(ctx: ParserRuleContext): ForStatement {
     const expressions = this.findAllRuleChildren(ctx, XLangParser.RULE_expression);
     const blockCtx = this.findRuleChild(ctx, XLangParser.RULE_block)!;
@@ -208,6 +215,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建 return 语句
   private buildReturnStatement(ctx: ParserRuleContext): ReturnStatement {
     const exprCtx = this.findRuleChild(ctx, XLangParser.RULE_expression);
     return {
@@ -217,6 +225,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建表达式语句
   private buildExpressionStatement(ctx: ParserRuleContext): ExpressionStatement {
     const exprCtx = this.findRuleChild(ctx, XLangParser.RULE_expression)!;
     return {
@@ -226,6 +235,7 @@ export class ASTBuilder {
     };
   }
 
+  // 构建语句块
   private buildBlock(ctx: ParserRuleContext): BlockStatement {
     const stmts: Statement[] = [];
     for (const child of ctx.children ?? []) {
@@ -245,6 +255,7 @@ export class ASTBuilder {
   // Expressions
   // -----------------------------------------------------------------------
 
+  // 构建表达式入口
   buildExpression(ctx: ParserRuleContext): Expression {
     const ruleIndex = ctx.ruleIndex;
 
@@ -305,6 +316,7 @@ export class ASTBuilder {
     );
   }
 
+  // 构建赋值表达式
   private buildAssignmentExpression(ctx: ParserRuleContext): Expression {
     const children = ctx.children ?? [];
     if (children.length === 1) {
@@ -342,6 +354,7 @@ export class ASTBuilder {
     throw new ASTBuildError("Invalid assignment expression", loc(ctx));
   }
 
+  // 构建二元表达式链
   private buildBinaryChain(ctx: ParserRuleContext): Expression {
     const children = ctx.children ?? [];
     if (children.length === 1) {
@@ -377,6 +390,7 @@ export class ASTBuilder {
     return left!;
   }
 
+  // 构建一元表达式
   private buildUnaryExpression(ctx: ParserRuleContext): Expression {
     const children = ctx.children ?? [];
     if (children.length === 1) {
@@ -392,7 +406,7 @@ export class ASTBuilder {
       if (operandCtx instanceof ParserRuleContext) {
         return {
           type: "UnaryExpression",
-          operator: (opText === "typeof" ? "!" : opText) as UnaryOperator,
+          operator: opText as UnaryOperator,
           argument: this.buildExpression(operandCtx),
           loc: loc(ctx),
         };
@@ -402,6 +416,7 @@ export class ASTBuilder {
     throw new ASTBuildError("Invalid unary expression", loc(ctx));
   }
 
+  // 构建后缀表达式（访问/调用）
   private buildPostfixExpression(ctx: ParserRuleContext): Expression {
     const children = ctx.children ?? [];
     if (children.length === 0) {
@@ -426,6 +441,7 @@ export class ASTBuilder {
     return result;
   }
 
+  // 应用后缀操作到表达式
   private applyPostfixOp(
     target: Expression,
     opCtx: ParserRuleContext,
@@ -478,6 +494,7 @@ export class ASTBuilder {
     throw new ASTBuildError(`Unknown postfix op: ${firstText}`, loc(opCtx));
   }
 
+  // 构建基础表达式
   private buildPrimaryExpression(ctx: ParserRuleContext): Expression {
     const children = ctx.children ?? [];
     if (children.length === 0) {
@@ -537,6 +554,7 @@ export class ASTBuilder {
     throw new ASTBuildError(`Unexpected primary expression: ${text}`, loc(ctx));
   }
 
+  // 构建数组字面量
   private buildArrayLiteral(ctx: ParserRuleContext): Expression {
     const elements: Expression[] = [];
     for (const child of ctx.children ?? []) {
@@ -547,6 +565,7 @@ export class ASTBuilder {
     return { type: "ArrayExpression", elements, loc: loc(ctx) };
   }
 
+  // 构建对象字面量
   private buildObjectLiteral(ctx: ParserRuleContext): Expression {
     const properties: Property[] = [];
     const propContexts = this.findAllRuleChildren(ctx, XLangParser.RULE_property);
@@ -572,6 +591,7 @@ export class ASTBuilder {
     return { type: "ObjectExpression", properties, loc: loc(ctx) };
   }
 
+  // 构建箭头函数
   private buildArrowFunction(ctx: ParserRuleContext): Expression {
     const paramListCtx = this.findRuleChild(ctx, XLangParser.RULE_parameterList);
     const params = paramListCtx ? this.buildParameterList(paramListCtx) : [];
@@ -597,6 +617,7 @@ export class ASTBuilder {
   // Arguments
   // -----------------------------------------------------------------------
 
+  // 构建函数调用参数
   private buildArgument(ctx: ParserRuleContext): CallArgument {
     const children = ctx.children ?? [];
 
@@ -642,6 +663,7 @@ export class ASTBuilder {
   // Helpers
   // -----------------------------------------------------------------------
 
+  // 构建参数列表
   private buildParameterList(ctx: ParserRuleContext): Parameter[] {
     const params: Parameter[] = [];
     const paramContexts = this.findAllRuleChildren(ctx, XLangParser.RULE_parameter);
@@ -658,6 +680,7 @@ export class ASTBuilder {
     return params;
   }
 
+  // 构建类型标注
   private buildTypeAnnotation(ctx: ParserRuleContext): TypeAnnotationNode {
     const baseCtx = this.findRuleChild(ctx, XLangParser.RULE_baseType);
     const text = baseCtx?.getText() ?? ctx.getText();
@@ -684,6 +707,7 @@ export class ASTBuilder {
     return baseType;
   }
 
+  // 查找第一个匹配规则子节点
   private findRuleChild(
     ctx: ParserRuleContext,
     ruleIndex: number,
@@ -696,6 +720,7 @@ export class ASTBuilder {
     return null;
   }
 
+  // 查找全部匹配规则子节点
   private findAllRuleChildren(
     ctx: ParserRuleContext,
     ruleIndex: number,

@@ -60,6 +60,7 @@ export interface ASTVisitor<R = void> {
   visitNamedArgument(node: NamedArgument): R;
 }
 
+// 根据节点类型分发到对应访问方法
 export function visitNode<R>(
   node: { readonly type: string },
   visitor: ASTVisitor<R>,

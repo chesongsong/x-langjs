@@ -154,7 +154,7 @@ export interface BinaryExpression extends BaseNode {
   readonly right: Expression;
 }
 
-export type UnaryOperator = "!" | "-";
+export type UnaryOperator = "!" | "-" | "typeof";
 
 export interface UnaryExpression extends BaseNode {
   readonly type: "UnaryExpression";
@@ -162,7 +162,7 @@ export interface UnaryExpression extends BaseNode {
   readonly argument: Expression;
 }
 
-export type AssignmentOperator = "=" | "+=" | "-=";
+export type AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=";
 
 export interface AssignmentExpression extends BaseNode {
   readonly type: "AssignmentExpression";

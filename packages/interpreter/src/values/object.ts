@@ -1,7 +1,7 @@
 import { Xvalue } from "./base.js";
-import { ZNull } from "./null.js";
+import { XNull } from "./null.js";
 
-export class ZObject extends Xvalue {
+export class XObject extends Xvalue {
   readonly entries: Record<string, Xvalue>;
 
   constructor(entries: Record<string, Xvalue>) {
@@ -14,7 +14,7 @@ export class ZObject extends Xvalue {
   }
 
   get(key: string): Xvalue {
-    return this.entries[key] ?? ZNull.instance;
+    return this.entries[key] ?? XNull.instance;
   }
 
   set(key: string, value: Xvalue): void {

@@ -20,6 +20,7 @@ import type {
 export class ScopeResolver {
   private scopeStack: Set<string>[] = [];
 
+  // 解析整个程序的作用域
   resolve(program: Program): Program {
     return {
       ...program,
@@ -27,6 +28,7 @@ export class ScopeResolver {
     };
   }
 
+  // 解析顶层代码块作用域
   private resolveScopeBlock(scope: ScopeBlock): ScopeBlock {
     this.pushScope();
     const body = this.resolveStatements(scope.body as Statement[]);
@@ -34,10 +36,12 @@ export class ScopeResolver {
     return { ...scope, body };
   }
 
+  // 逐条解析语句列表
   private resolveStatements(stmts: Statement[]): Statement[] {
     return stmts.map((s) => this.resolveStatement(s));
   }
 
+  // 根据类型分发语句解析
   private resolveStatement(stmt: Statement): Statement {
     switch (stmt.type) {
       case "ExpressionStatement":
@@ -61,6 +65,7 @@ export class ScopeResolver {
     }
   }
 
+  // 解析表达式语句并处理隐式声明
   private resolveExpressionStatement(
     stmt: ExpressionStatement,
   ): ExpressionStatement | VariableDeclaration {
@@ -84,6 +89,7 @@ export class ScopeResolver {
     };
   }
 
+  // 解析函数声明并建立参数作用域
   private resolveFunctionDeclaration(
     stmt: FunctionDeclaration,
   ): FunctionDeclaration {
@@ -99,6 +105,7 @@ export class ScopeResolver {
     return { ...stmt, body };
   }
 
+  // 解析 if/else 作用域
   private resolveIfStatement(stmt: IfStatement): IfStatement {
     const test = this.resolveExpression(stmt.test);
     const consequent = this.resolveBlockStatement(stmt.consequent);
@@ -112,6 +119,7 @@ export class ScopeResolver {
     return { ...stmt, test, consequent, alternate };
   }
 
+  // 解析 while 作用域
   private resolveWhileStatement(stmt: WhileStatement): WhileStatement {
     return {
       ...stmt,
@@ -120,6 +128,7 @@ export class ScopeResolver {
     };
   }
 
+  // 解析 for 作用域
   private resolveForStatement(stmt: ForStatement): ForStatement {
     this.pushScope();
 
@@ -135,6 +144,7 @@ export class ScopeResolver {
     return { ...stmt, init, test, update, body };
   }
 
+  // 解析 for 初始化表达式并处理隐式声明
   private resolveForInit(expr: Expression): Expression {
     if (this.isImplicitDeclaration(expr)) {
       const assign = expr as AssignmentExpression;
@@ -144,6 +154,7 @@ export class ScopeResolver {
     return this.resolveExpression(expr);
   }
 
+  // 解析语句块并创建子作用域
   private resolveBlockStatement(block: BlockStatement): BlockStatement {
     this.pushScope();
     const body = this.resolveStatements(block.body as Statement[]);
@@ -151,6 +162,7 @@ export class ScopeResolver {
     return { ...block, body };
   }
 
+  // 解析 return 表达式
   private resolveReturnStatement(stmt: ReturnStatement): ReturnStatement {
     if (!stmt.argument) return stmt;
     return { ...stmt, argument: this.resolveExpression(stmt.argument) };
@@ -160,6 +172,7 @@ export class ScopeResolver {
   // Expression resolution (recursively resolves nested expressions)
   // -----------------------------------------------------------------------
 
+  // 解析表达式并递归处理子节点
   private resolveExpression(expr: Expression): Expression {
     switch (expr.type) {
       case "AssignmentExpression":
@@ -225,6 +238,7 @@ export class ScopeResolver {
     }
   }
 
+  // 解析函数调用单个参数
   private resolveCallArgument(arg: CallArgument): CallArgument {
     if (arg.type === "NamedArgument") {
       return { ...arg, value: this.resolveExpression(arg.value) };
@@ -236,14 +250,17 @@ export class ScopeResolver {
   // Scope helpers
   // -----------------------------------------------------------------------
 
+  // 压入新作用域
   private pushScope(): void {
     this.scopeStack.push(new Set());
   }
 
+  // 弹出当前作用域
   private popScope(): void {
     this.scopeStack.pop();
   }
 
+  // 在当前作用域登记变量名
   private defineInCurrentScope(name: string): void {
     const current = this.scopeStack[this.scopeStack.length - 1];
     if (current) {
@@ -251,6 +268,7 @@ export class ScopeResolver {
     }
   }
 
+  // 判断变量名是否已在任意作用域定义
   private isDefined(name: string): boolean {
     for (let i = this.scopeStack.length - 1; i >= 0; i--) {
       if (this.scopeStack[i]!.has(name)) return true;
@@ -258,6 +276,7 @@ export class ScopeResolver {
     return false;
   }
 
+  // 判断是否为隐式声明（首次赋值）
   private isImplicitDeclaration(expr: Expression): boolean {
     return (
       expr.type === "AssignmentExpression" &&

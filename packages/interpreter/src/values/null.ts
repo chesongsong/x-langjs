@@ -1,9 +1,9 @@
 import { Xvalue } from "./base.js";
 
-const NULL_SINGLETON = Symbol("ZNull");
+const NULL_SINGLETON = Symbol("XNull");
 
-export class ZNull extends Xvalue {
-  static readonly instance = new ZNull(NULL_SINGLETON);
+export class XNull extends Xvalue {
+  static readonly instance = new XNull(NULL_SINGLETON);
 
   private constructor(_token: typeof NULL_SINGLETON) {
     super();

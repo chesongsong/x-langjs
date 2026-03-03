@@ -1,6 +1,6 @@
 import { Xvalue } from "./base.js";
 
-export class ZString extends Xvalue {
+export class XString extends Xvalue {
   readonly value: string;
 
   constructor(value: string) {

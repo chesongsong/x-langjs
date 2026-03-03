@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import type { Dayjs, ConfigType } from "dayjs";
 import { Xvalue } from "./base.js";
 
-export class ZDate extends Xvalue {
+export class XDate extends Xvalue {
   readonly inner: Dayjs;
 
   constructor(value?: ConfigType) {

@@ -1,18 +1,18 @@
 // Value domain — basic types
 export { Xvalue } from "./values/base.js";
-export { ZNumber } from "./values/number.js";
-export { ZString } from "./values/string.js";
-export { ZBool } from "./values/bool.js";
-export { ZNull } from "./values/null.js";
-export { ZArray } from "./values/array.js";
-export { ZObject } from "./values/object.js";
-export { ZFunction } from "./values/function.js";
-export { ZDate } from "./values/date.js";
+export { XNumber } from "./values/number.js";
+export { XString } from "./values/string.js";
+export { XBool } from "./values/bool.js";
+export { XNull } from "./values/null.js";
+export { XArray } from "./values/array.js";
+export { XObject } from "./values/object.js";
+export { XFunction } from "./values/function.js";
+export { XDate } from "./values/date.js";
 export { box } from "./values/index.js";
 
 // Renderables — UI-renderable value types
-export { ZRenderable } from "./renderables/base.js";
-export { ZRenderCustom } from "./renderables/custom.js";
+export { XRenderable } from "./renderables/base.js";
+export { XRenderCustom } from "./renderables/custom.js";
 
 // Signals
 export { ReturnSignal, BreakSignal, ContinueSignal } from "./signals.js";

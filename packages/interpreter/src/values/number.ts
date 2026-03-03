@@ -1,6 +1,6 @@
 import { Xvalue } from "./base.js";
 
-export class ZNumber extends Xvalue {
+export class XNumber extends Xvalue {
   readonly value: number;
 
   constructor(value: number) {

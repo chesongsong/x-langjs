@@ -1,31 +1,31 @@
 export { Xvalue } from "./base.js";
-export { ZNumber } from "./number.js";
-export { ZString } from "./string.js";
-export { ZBool } from "./bool.js";
-export { ZNull } from "./null.js";
-export { ZArray } from "./array.js";
-export { ZObject } from "./object.js";
-export { ZFunction } from "./function.js";
-export { ZDate } from "./date.js";
+export { XNumber } from "./number.js";
+export { XString } from "./string.js";
+export { XBool } from "./bool.js";
+export { XNull } from "./null.js";
+export { XArray } from "./array.js";
+export { XObject } from "./object.js";
+export { XFunction } from "./function.js";
+export { XDate } from "./date.js";
 
 import { Xvalue } from "./base.js";
-import { ZNumber } from "./number.js";
-import { ZString } from "./string.js";
-import { ZBool } from "./bool.js";
-import { ZNull } from "./null.js";
-import { ZArray } from "./array.js";
-import { ZObject } from "./object.js";
-import { ZDate } from "./date.js";
+import { XNumber } from "./number.js";
+import { XString } from "./string.js";
+import { XBool } from "./bool.js";
+import { XNull } from "./null.js";
+import { XArray } from "./array.js";
+import { XObject } from "./object.js";
+import { XDate } from "./date.js";
 
 export function box(value: unknown): Xvalue {
-  if (value === null || value === undefined) return ZNull.instance;
-  if (typeof value === "number") return new ZNumber(value);
-  if (typeof value === "string") return new ZString(value);
-  if (typeof value === "boolean") return new ZBool(value);
-  if (value instanceof Date) return new ZDate(value);
+  if (value === null || value === undefined) return XNull.instance;
+  if (typeof value === "number") return new XNumber(value);
+  if (typeof value === "string") return new XString(value);
+  if (typeof value === "boolean") return new XBool(value);
+  if (value instanceof Date) return new XDate(value);
 
   if (Array.isArray(value)) {
-    return new ZArray(value.map(box));
+    return new XArray(value.map(box));
   }
 
   if (typeof value === "object") {
@@ -33,8 +33,8 @@ export function box(value: unknown): Xvalue {
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       entries[k] = box(v);
     }
-    return new ZObject(entries);
+    return new XObject(entries);
   }
 
-  return new ZString(String(value));
+  return new XString(String(value));
 }

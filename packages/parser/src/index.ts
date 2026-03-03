@@ -30,11 +30,13 @@ export interface TokenInfo {
   readonly channel: number;
 }
 
+// 根据源码创建词法分析器
 export function createLexer(source: string): XLangLexer {
   const chars = CharStream.fromString(source);
   return new XLangLexer(chars);
 }
 
+// 词法分析并返回 token 列表
 export function tokenize(source: string): readonly TokenInfo[] {
   const lexer = createLexer(source);
   const errorListener = new XLangErrorListener();
@@ -65,6 +67,7 @@ export function tokenize(source: string): readonly TokenInfo[] {
   return tokens;
 }
 
+// 解析源码为语法树并收集错误
 export function parse(source: string): ParseResult {
   const lexer = createLexer(source);
   const lexerErrorListener = new XLangErrorListener();
@@ -89,6 +92,7 @@ export function parse(source: string): ParseResult {
   return { tree, tokens, errors };
 }
 
+// 将 token 转换为源码位置信息
 export function locationFromToken(token: Token): SourceLocation {
   return {
     start: {

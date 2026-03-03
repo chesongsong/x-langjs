@@ -1,5 +1,5 @@
 import type { SimpleSetup, AdvancedSetup, RenderableContext } from "@x-lang/core";
-import { ZArray, ZObject } from "@x-lang/core";
+import { XArray, XObject } from "@x-lang/core";
 
 // ---------------------------------------------------------------------------
 // Button
@@ -128,7 +128,7 @@ export const descriptionsSetup: SimpleSetup<DescriptionsData> = (
   const source = args[0];
   const items: DescItem[] = [];
 
-  if (source instanceof ZObject) {
+  if (source instanceof XObject) {
     for (const [key, val] of Object.entries(source.entries)) {
       items.push({ label: key, value: val.toString() });
     }
@@ -279,12 +279,12 @@ export interface RenderTableData {
   readonly columns: readonly RenderTableColumn[];
 }
 
-function inferColumns(records: ZArray): RenderTableData {
+function inferColumns(records: XArray): RenderTableData {
   const keySet = new Set<string>();
   const keyOrder: string[] = [];
 
   for (const record of records.elements) {
-    if (record instanceof ZObject) {
+    if (record instanceof XObject) {
       for (const key of Object.keys(record.entries)) {
         if (!keySet.has(key)) {
           keySet.add(key);
@@ -298,7 +298,7 @@ function inferColumns(records: ZArray): RenderTableData {
     columns: keyOrder.map((key) => ({
       name: key,
       values: records.elements.map((record) =>
-        record instanceof ZObject ? record.get(key).unbox() : null,
+        record instanceof XObject ? record.get(key).unbox() : null,
       ),
     })),
   };
@@ -306,7 +306,7 @@ function inferColumns(records: ZArray): RenderTableData {
 
 function resolveColumns(
   ctx: RenderableContext,
-  records: ZArray,
+  records: XArray,
 ): RenderTableData {
   const columnArgs = ctx.args.slice(1);
 
@@ -314,7 +314,7 @@ function resolveColumns(
     if (arg.type === "NamedArgument") {
       const values = records.elements.map((record) => {
         const childEnv = ctx.createChildEnv();
-        if (record instanceof ZObject) {
+        if (record instanceof XObject) {
           for (const [key, val] of Object.entries(record.entries)) {
             childEnv.define(key, val);
           }
@@ -329,7 +329,7 @@ function resolveColumns(
       return {
         name: arg.name,
         values: records.elements.map((record) =>
-          record instanceof ZObject ? record.get(arg.name).unbox() : null,
+          record instanceof XObject ? record.get(arg.name).unbox() : null,
         ),
       };
     }
@@ -356,7 +356,7 @@ export const tableSetup: AdvancedSetup<RenderTableData> = {
     }
 
     const recordsVal = ctx.evaluate(firstArg);
-    if (!(recordsVal instanceof ZArray)) {
+    if (!(recordsVal instanceof XArray)) {
       throw new Error("table first argument must be an array");
     }
 

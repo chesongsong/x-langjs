@@ -1,2 +1,2 @@
-export { ZRenderable } from "./base.js";
-export { ZRenderCustom } from "./custom.js";
+export { XRenderable } from "./base.js";
+export { XRenderCustom } from "./custom.js";

@@ -1,6 +1,6 @@
 import { Xvalue } from "./base.js";
 
-export class ZBool extends Xvalue {
+export class XBool extends Xvalue {
   readonly value: boolean;
 
   constructor(value: boolean) {

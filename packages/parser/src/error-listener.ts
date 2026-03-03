@@ -9,6 +9,7 @@ import { ParseError } from "@x-lang/types";
 export class XLangErrorListener implements ANTLRErrorListener {
   public readonly errors: ParseError[] = [];
 
+  // 记录语法错误
   syntaxError(
     _recognizer: Recognizer<ATNSimulator>,
     _offendingSymbol: unknown,
@@ -28,14 +29,17 @@ export class XLangErrorListener implements ANTLRErrorListener {
     );
   }
 
+  // 忽略歧义报告
   reportAmbiguity(): void {
     // intentionally empty — ambiguity reports are not treated as errors
   }
 
+  // 忽略全上下文尝试报告
   reportAttemptingFullContext(): void {
     // intentionally empty
   }
 
+  // 忽略上下文敏感报告
   reportContextSensitivity(): void {
     // intentionally empty
   }

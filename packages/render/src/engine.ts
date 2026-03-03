@@ -1,5 +1,5 @@
 import type { OutputSegment } from "@x-lang/interpreter";
-import { Xvalue, ZRenderable } from "@x-lang/interpreter";
+import { Xvalue, XRenderable } from "@x-lang/interpreter";
 import type {
   ComponentFactory,
   ComponentHandle,
@@ -249,7 +249,7 @@ export class RenderEngine {
 
     const value = result.value;
 
-    if (value instanceof ZRenderable) {
+    if (value instanceof XRenderable) {
       const renderer = this.factory.createRenderer(value.kind);
       if (renderer) {
         slot.wrapper.className = `render-segment render-${value.kind}`;

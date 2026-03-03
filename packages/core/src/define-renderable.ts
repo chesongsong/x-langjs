@@ -1,6 +1,6 @@
 import type { Expression, CallArgument } from "@x-lang/types";
 import type { BuiltinFunction, Evaluator } from "@x-lang/interpreter";
-import { ZRenderCustom } from "@x-lang/interpreter";
+import { XRenderCustom } from "@x-lang/interpreter";
 import type { Xvalue } from "@x-lang/interpreter";
 import { Environment, box } from "@x-lang/interpreter";
 
@@ -76,7 +76,7 @@ class SimpleRenderableBuiltin implements BuiltinFunction {
     }
 
     const data = this.handler(positional, named);
-    return new ZRenderCustom(this.renderKind, data);
+    return new XRenderCustom(this.renderKind, data);
   }
 }
 
@@ -104,7 +104,7 @@ class AdvancedRenderableBuiltin implements BuiltinFunction {
     };
 
     const data = this.handler.execute(ctx);
-    return new ZRenderCustom(this.renderKind, data);
+    return new XRenderCustom(this.renderKind, data);
   }
 }
 

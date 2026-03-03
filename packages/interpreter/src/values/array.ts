@@ -1,7 +1,7 @@
 import { Xvalue } from "./base.js";
-import { ZNull } from "./null.js";
+import { XNull } from "./null.js";
 
-export class ZArray extends Xvalue {
+export class XArray extends Xvalue {
   readonly elements: Xvalue[];
 
   constructor(elements: Xvalue[]) {
@@ -18,7 +18,7 @@ export class ZArray extends Xvalue {
   }
 
   get(index: number): Xvalue {
-    return this.elements[index] ?? ZNull.instance;
+    return this.elements[index] ?? XNull.instance;
   }
 
   set(index: number, value: Xvalue): void {

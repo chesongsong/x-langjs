@@ -1,9 +1,8 @@
 <template>
   <div style="padding: 8px 0">
-    <AStatistic :title="title">
+    <AStatistic :title="title" :value="value">
       <template #prefix v-if="prefix">{{ prefix }}</template>
       <template #suffix v-if="suffix">{{ suffix }}</template>
-      {{ value }}
     </AStatistic>
   </div>
 </template>

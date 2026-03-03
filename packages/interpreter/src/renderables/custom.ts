@@ -1,6 +1,6 @@
-import { ZRenderable } from "./base.js";
+import { XRenderable } from "./base.js";
 
-export class ZRenderCustom extends ZRenderable {
+export class XRenderCustom extends XRenderable {
   private readonly _kind: string;
   private readonly _data: unknown;
 

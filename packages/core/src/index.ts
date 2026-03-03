@@ -44,19 +44,19 @@ export { type ASTVisitor, visitNode } from "@x-lang/ast";
 // Value domain — basic types
 export {
   Xvalue,
-  ZNumber,
-  ZString,
-  ZBool,
-  ZNull,
-  ZArray,
-  ZObject,
-  ZFunction,
-  ZDate,
+  XNumber,
+  XString,
+  XBool,
+  XNull,
+  XArray,
+  XObject,
+  XFunction,
+  XDate,
   box,
 } from "@x-lang/interpreter";
 
 // Renderables — UI-renderable value types
-export { ZRenderable, ZRenderCustom } from "@x-lang/interpreter";
+export { XRenderable, XRenderCustom } from "@x-lang/interpreter";
 
 // Renderable definition API
 export { defineRenderable } from "./define-renderable.js";

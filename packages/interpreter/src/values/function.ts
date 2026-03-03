@@ -2,7 +2,7 @@ import type { BlockStatement, Expression } from "@x-lang/types";
 import { Xvalue } from "./base.js";
 import type { Environment } from "../environment.js";
 
-export class ZFunction extends Xvalue {
+export class XFunction extends Xvalue {
   readonly name: string;
   readonly params: string[];
   readonly body: Expression | BlockStatement;

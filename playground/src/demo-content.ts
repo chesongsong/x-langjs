@@ -341,7 +341,8 @@ hotelconfirm(
   dateValue = "2026年2月12日",
   actionItems = ["房态：打开", "添加保留房：统一设置为 2 间", "保留房售完后：直接关房"],
   tip = "以上修改内容确认无误后可点击 确认提交按钮",
-  buttonText = "确认提交"
+  buttonText = "确认提交",
+  submitMessage = "已提交并进入下一步"
 )
 \`\`\`
 

@@ -297,6 +297,7 @@ export interface HotelConfirmData {
   readonly actionItems: readonly string[];
   readonly tip: string;
   readonly buttonText: string;
+  readonly submitMessage: string;
 }
 
 // Normalize list entries into displayable text lines.
@@ -406,6 +407,15 @@ export const hotelConfirmSetup: SimpleSetup<HotelConfirmData> = (args, named) =>
         : undefined) ??
       "确认提交",
   );
+  const submitMessage = coerceText(
+    (named.submitMessage as string) ??
+      (named.message as string) ??
+      (source && typeof source === "object"
+        ? (source as Record<string, unknown>).submitMessage ??
+          (source as Record<string, unknown>).message
+        : undefined) ??
+      "已提交",
+  );
 
   return {
     hotelNameTitle,
@@ -418,6 +428,7 @@ export const hotelConfirmSetup: SimpleSetup<HotelConfirmData> = (args, named) =>
     actionItems,
     tip,
     buttonText,
+    submitMessage,
   };
 };
 

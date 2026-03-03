@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { Card as ACard, Button as AButton, message } from "ant-design-vue";
 
-defineProps<{
+const props = defineProps<{
   hotelNameTitle: string;
   hotelName: string;
   roomTitle: string;
@@ -48,10 +48,11 @@ defineProps<{
   actionItems: string[];
   tip: string;
   buttonText: string;
+  submitMessage: string;
 }>();
 
 function handleSubmit() {
-  message.success("已提交");
+  message.success(props.submitMessage || "已提交");
 }
 </script>
 

@@ -40,7 +40,7 @@ import "element-plus/es/components/card/style/css";
 import "element-plus/es/components/button/style/css";
 import "element-plus/es/components/message/style/css";
 
-defineProps<{
+const props = defineProps<{
   hotelNameTitle: string;
   hotelName: string;
   roomTitle: string;
@@ -51,10 +51,11 @@ defineProps<{
   actionItems: string[];
   tip: string;
   buttonText: string;
+  submitMessage: string;
 }>();
 
 function handleSubmit() {
-  ElMessage.success("已提交");
+  ElMessage.success(props.submitMessage || "已提交");
 }
 </script>
 

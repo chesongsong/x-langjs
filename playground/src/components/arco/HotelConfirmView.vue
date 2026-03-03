@@ -40,7 +40,7 @@ import "@arco-design/web-vue/es/card/style/css.js";
 import "@arco-design/web-vue/es/button/style/css.js";
 import "@arco-design/web-vue/es/message/style/css.js";
 
-defineProps<{
+const props = defineProps<{
   hotelNameTitle: string;
   hotelName: string;
   roomTitle: string;
@@ -51,10 +51,11 @@ defineProps<{
   actionItems: string[];
   tip: string;
   buttonText: string;
+  submitMessage: string;
 }>();
 
 function handleSubmit() {
-  Message.success("已提交");
+  Message.success(props.submitMessage || "已提交");
 }
 </script>
 

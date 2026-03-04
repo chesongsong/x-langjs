@@ -32,4 +32,4 @@
 - 根目录：`pnpm install` → `pnpm run build` → `pnpm run dev` 启动 Playground。
 - 集成：通过 `@x-lang/core` 的 `parse`、`run`、`XLangApp`、`defineComponent` 等 API 接入自有项目。
 
-[0.1.0]: https://github.com/chesongsong/zlang/releases/tag/v0.1.0
+[0.1.0]: https://github.com/chesongsong/x-lang/releases/tag/v0.1.0

@@ -69,7 +69,7 @@ import { parse, run, XLangApp } from "@x-lang/core";
 
 ### 方式二：通过产物文件使用
 
-不依赖 npm，直接下载构建好的单文件引入项目。从 [GitHub Releases](https://github.com/chesongsong/zlang/releases) 下载对应版本的文件：
+不依赖 npm，直接下载构建好的单文件引入项目。从 [GitHub Releases](https://github.com/chesongsong/x-lang/releases) 下载对应版本的文件：
 
 | 文件 | 说明 |
 |------|------|

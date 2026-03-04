@@ -1,6 +1,26 @@
 # 发布到 GitHub Release 与 npm
 
-## 流程说明
+## 本地一键发布（推荐）
+
+在仓库根目录执行脚本即可完成：构建 → 发布到 npm →（可选）打 tag 并推送以触发 GitHub Release。
+
+```bash
+# 方式一：使用脚本（可带版本号）
+./scripts/publish.sh              # 用当前版本，只构建并发布 npm
+./scripts/publish.sh 0.0.2        # 改为 0.0.2，构建 + 发布 npm + 打 tag 并推送
+./scripts/publish.sh 0.0.2 --no-tag   # 只改版本、构建、发布 npm，不打 tag
+./scripts/publish.sh --dry-run    # 仅构建，不真正发布、不 git 操作
+
+# 方式二：通过 npm 命令
+pnpm run publish:local           # 等同于 ./scripts/publish.sh
+pnpm run publish:local -- 0.0.2  # 带参数需用 -- 分隔
+```
+
+**发布前**：若未配置 `NPM_TOKEN` 环境变量，需先在本机执行 `npm login` 登录 npm。
+
+---
+
+## 流程说明（CI 自动发布）
 
 1. 推送版本 tag（如 `v0.1.0`）到仓库后，GitHub Actions 会触发 **Release** 工作流。
 2. 工作流会执行：安装依赖 → 构建 types → 构建 core 与各包 → 构建 playground。

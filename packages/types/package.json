@@ -1,11 +1,13 @@
 {
   "name": "@x-lang/types",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "TypeScript type definitions for x-lang AST, tokens, and errors",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc --build"
   }

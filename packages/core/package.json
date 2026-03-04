@@ -1,6 +1,6 @@
 {
   "name": "@x-lang/core",
-  "version": "0.1.0",
+  "version": "0.0.2",
   "description": "Core package for x-lang — parse, tokenize, and work with x-lang AST",
   "type": "module",
   "main": "./dist/index.js",
@@ -11,7 +11,10 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc --build"
   },

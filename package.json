@@ -13,6 +13,7 @@
     "playground"
   ],
   "scripts": {
+    "publish:local": "bash scripts/publish.sh",
     "generate:lexer": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir -- packages/parser/grammar/XLangLexer.g4",
     "generate:parser": "antlr-ng -Dlanguage=TypeScript -v -o packages/parser/src/generated --exact-output-dir --lib packages/parser/src/generated -- packages/parser/grammar/XLangParser.g4",
     "generate": "npm run generate:lexer && npm run generate:parser",

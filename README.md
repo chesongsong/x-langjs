@@ -1,5 +1,7 @@
 # x-langjs
 
+English version: `README.en.md`
+
 基于 ANTLR4 与 TypeScript 实现的领域语言，支持在 Markdown 中嵌入 \`\`\`x-langjs\`\`\` 代码块，解析执行后将代码块交给可插拔的渲染引擎（如 Vue + 任意 UI 库）展示为自定义组件。
 
 An ANTLR4 + TypeScript DSL runtime that executes \`\`\`x-langjs\`\`\` blocks inside Markdown and renders results through a pluggable UI layer.

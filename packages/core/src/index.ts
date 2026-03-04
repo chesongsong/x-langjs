@@ -27,6 +27,7 @@ export type {
   EventCallback,
   ComponentRenderer,
   ComponentFactory,
+  PartialComponentFactory,
   ComponentInstance,
   CodeBlockData,
   PendingData,

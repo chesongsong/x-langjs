@@ -187,10 +187,14 @@ export class RenderEngine {
     }
   }
 
+  private pushDisposable(slot: RenderedSlot, handle: Disposable | ComponentHandle | void): void {
+    if (handle) slot.disposables.push(handle);
+  }
+
   private renderMarkdown(content: string, slot: RenderedSlot): void {
     slot.wrapper.className = "render-segment render-markdown";
     const renderer = this.factory.createMarkdownRenderer();
-    slot.disposables.push(renderer.render(content, slot.wrapper));
+    this.pushDisposable(slot, renderer.render(content, slot.wrapper));
   }
 
   private renderCodeBlock(
@@ -200,7 +204,7 @@ export class RenderEngine {
   ): void {
     slot.wrapper.className = "render-segment render-codeblock";
     const renderer = this.factory.createCodeBlockRenderer();
-    slot.disposables.push(renderer.render({ language, content }, slot.wrapper));
+    this.pushDisposable(slot, renderer.render({ language, content }, slot.wrapper));
   }
 
   private renderPending(
@@ -221,14 +225,14 @@ export class RenderEngine {
       if (skeletonFactory) {
         slot.wrapper.className = `render-segment render-pending render-pending-${componentName}`;
         const renderer = skeletonFactory();
-        slot.disposables.push(renderer.render(pendingData, slot.wrapper));
+        this.pushDisposable(slot, renderer.render(pendingData, slot.wrapper));
         return;
       }
     }
 
     slot.wrapper.className = "render-segment render-pending";
     const renderer = this.factory.createPendingRenderer();
-    slot.disposables.push(renderer.render(pendingData, slot.wrapper));
+    this.pushDisposable(slot, renderer.render(pendingData, slot.wrapper));
   }
 
   private detectComponentName(content: string): string | null {
@@ -266,11 +270,11 @@ export class RenderEngine {
           const ctx = this.createRenderContext(kind);
           const handle = renderer.render(renderable.renderData, itemWrapper, ctx);
 
-          slot.disposables.push(handle);
+          if (handle) slot.disposables.push(handle);
           slot.instances.push({
             kind,
             index: this.countKind(kind),
-            handle: handle as ComponentHandle,
+            handle: (handle ?? { dispose: () => {} }) as ComponentHandle,
           });
         }
         return;
@@ -285,11 +289,11 @@ export class RenderEngine {
         const ctx = this.createRenderContext(kind);
         const handle = renderer.render(value.renderData, slot.wrapper, ctx);
 
-        slot.disposables.push(handle);
+        if (handle) slot.disposables.push(handle);
         slot.instances.push({
           kind,
           index: this.countKind(kind),
-          handle: handle as ComponentHandle,
+          handle: (handle ?? { dispose: () => {} }) as ComponentHandle,
         });
         return;
       }
@@ -298,7 +302,7 @@ export class RenderEngine {
     const formatted = value.toString();
     slot.wrapper.className = "render-segment render-scope";
     const renderer = this.factory.createMarkdownRenderer();
-    slot.disposables.push(renderer.render(formatted, slot.wrapper));
+    this.pushDisposable(slot, renderer.render(formatted, slot.wrapper));
   }
 
   private countKind(kind: string): number {

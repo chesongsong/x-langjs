@@ -7,6 +7,7 @@ export type {
   CodeBlockData,
   PendingData,
   ComponentFactory,
+  PartialComponentFactory,
 } from "./types.js";
 
 export { RenderEngine } from "./engine.js";

@@ -5,6 +5,8 @@ import { ElementComponentFactory } from "./renderers/element-factory";
 import { createComponents, type UILib } from "./components/_registry";
 import { registerXLang, createXLangTheme, XLANG_ID } from "./monaco-lang";
 import { STATIC_CODE, STREAM_CONTENT } from "./demo-content";
+import { initSimpleDemo } from "./simple-demo";
+import { initConversationDemo } from "./conversation-demo";
 import "@arco-design/web-vue/dist/arco.css";
 import "element-plus/dist/index.css";
 import "@arco-design/web-vue/es/collapse/style/css.js";
@@ -13,6 +15,37 @@ import "element-plus/es/components/collapse/style/css";
 import "element-plus/es/components/timeline/style/css";
 import "github-markdown-css/github-markdown-light.css";
 import "./style.css";
+
+// ---------------------------------------------------------------------------
+// Tab 切换（简单 Demo / 对话 Demo / 复杂 Demo）
+// ---------------------------------------------------------------------------
+const panelSimple       = document.getElementById("panel-simple")!;
+const panelConversation = document.getElementById("panel-conversation")!;
+const panelComplex      = document.getElementById("panel-complex")!;
+const demoTabs          = document.querySelectorAll<HTMLButtonElement>(".demo-tab");
+
+type TabId = "simple" | "conversation" | "complex";
+const inited = new Set<TabId>();
+
+function switchTab(tab: TabId) {
+  panelSimple.style.display       = tab === "simple"       ? "" : "none";
+  panelConversation.style.display = tab === "conversation" ? "" : "none";
+  panelComplex.style.display      = tab === "complex"      ? "" : "none";
+  demoTabs.forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tab));
+
+  if (!inited.has(tab)) {
+    inited.add(tab);
+    if (tab === "simple")       initSimpleDemo();
+    if (tab === "conversation") initConversationDemo();
+  }
+}
+
+demoTabs.forEach(btn => {
+  btn.addEventListener("click", () => switchTab(btn.dataset.tab as TabId));
+});
+
+// 默认初始化简单 Demo
+switchTab("simple");
 
 self.MonacoEnvironment = {
   getWorker() {

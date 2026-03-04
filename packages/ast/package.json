@@ -1,6 +1,6 @@
 {
   "name": "@x-langjs/ast",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "AST builder and visitor for x-langjs",
   "type": "module",
   "main": "./dist/index.js",

@@ -21,7 +21,7 @@ export interface ComponentRenderer<T = unknown> {
     value: T,
     container: HTMLElement,
     ctx?: RenderContext,
-  ): Disposable | ComponentHandle<T>;
+  ): Disposable | ComponentHandle<T> | void;
 }
 
 export interface CodeBlockData {
@@ -41,3 +41,6 @@ export interface ComponentFactory {
   createPendingRenderer(): ComponentRenderer<PendingData>;
   createRenderer(type: string): ComponentRenderer | null;
 }
+
+/** All methods are optional; unimplemented ones fall back to built-in defaults in XLangApp. */
+export type PartialComponentFactory = Partial<ComponentFactory>;

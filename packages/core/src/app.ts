@@ -12,13 +12,71 @@ import { EventBus } from "./event-bus.js";
 import type { EventHandler } from "./event-bus.js";
 
 // ---------------------------------------------------------------------------
-// Internal: Decorator over user-supplied base factory
+// Built-in fallback renderers (no external dependencies)
+// ---------------------------------------------------------------------------
+
+const BUILTIN_FACTORY: ComponentFactory = {
+  createMarkdownRenderer() {
+    return {
+      render(content: string, container: HTMLElement) {
+        const el = document.createElement("div");
+        el.textContent = content;
+        container.appendChild(el);
+        return { dispose: () => el.remove() };
+      },
+    };
+  },
+  createCodeBlockRenderer() {
+    return {
+      render(data: CodeBlockData, container: HTMLElement) {
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = data.content;
+        pre.appendChild(code);
+        container.appendChild(pre);
+        return { dispose: () => pre.remove() };
+      },
+    };
+  },
+  createPendingRenderer() {
+    return {
+      render(_: PendingData, container: HTMLElement) {
+        const el = document.createElement("span");
+        el.textContent = "…";
+        container.appendChild(el);
+        return { dispose: () => el.remove() };
+      },
+    };
+  },
+  createRenderer() {
+    return null;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Internal: Decorator over user-supplied (partial) factory + built-in fallback
 // ---------------------------------------------------------------------------
 
 class AppComponentFactory implements ComponentFactory {
   private readonly renderers = new Map<string, () => ComponentRenderer>();
+  private readonly base: ComponentFactory;
 
-  constructor(private readonly base: ComponentFactory) {}
+  constructor(partial?: Partial<ComponentFactory>) {
+    this.base = {
+      createMarkdownRenderer:
+        partial?.createMarkdownRenderer?.bind(partial) ??
+        BUILTIN_FACTORY.createMarkdownRenderer.bind(BUILTIN_FACTORY),
+      createCodeBlockRenderer:
+        partial?.createCodeBlockRenderer?.bind(partial) ??
+        BUILTIN_FACTORY.createCodeBlockRenderer.bind(BUILTIN_FACTORY),
+      createPendingRenderer:
+        partial?.createPendingRenderer?.bind(partial) ??
+        BUILTIN_FACTORY.createPendingRenderer.bind(BUILTIN_FACTORY),
+      createRenderer:
+        partial?.createRenderer?.bind(partial) ??
+        BUILTIN_FACTORY.createRenderer.bind(BUILTIN_FACTORY),
+    };
+  }
 
   register(name: string, factory: () => ComponentRenderer): void {
     this.renderers.set(name, factory);
@@ -54,7 +112,7 @@ export class XLangApp {
   private readonly bus = new EventBus();
   private vars: Record<string, unknown> = {};
 
-  constructor(baseFactory: ComponentFactory) {
+  constructor(baseFactory?: Partial<ComponentFactory>) {
     this.factory = new AppComponentFactory(baseFactory);
     this.engine = new RenderEngine(this.factory);
     this.engine.setEventCallback((kind: string, event: string, payload: unknown) => {

@@ -32,7 +32,7 @@ export type RenderFn<T = unknown> = (
   data: T,
   container: HTMLElement,
   ctx: RenderContext,
-) => ComponentHandle<T>;
+) => ComponentHandle<T> | void;
 
 export interface SkeletonContext {
   readonly content: string;

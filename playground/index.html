@@ -8,44 +8,98 @@
 </head>
 <body>
   <div id="app">
-    <main id="main">
-      <section id="editor-panel">
-        <div id="editor-toolbar">
-          <button id="btn-stream" class="toolbar-btn primary">流式演示</button>
-          <button id="btn-stop" class="toolbar-btn danger" style="display:none">停止</button>
-          <span id="stream-status" class="stream-status"></span>
-        </div>
-        <div id="editor"></div>
-      </section>
 
-      <div id="divider"></div>
+    <!-- 顶部 Tab 切换栏 -->
+    <div id="demo-tabs">
+      <button class="demo-tab active" data-tab="simple">简单 Demo</button>
+      <button class="demo-tab" data-tab="conversation">对话 Demo</button>
+      <button class="demo-tab" data-tab="complex">复杂 Demo</button>
+      <div class="demo-tab-spacer"></div>
+      <a
+        class="github-link tab-github"
+        href="https://github.com/chesongsong/x-langjs"
+        target="_blank"
+        rel="noreferrer"
+        title="GitHub"
+      >
+        <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+        </svg>
+        <span>GitHub</span>
+      </a>
+    </div>
 
-      <section id="output-panel">
-        <div id="output-toolbar">
-          <button type="button" class="lib-btn active" data-lib="element">Element Plus</button>
-          <button type="button" class="lib-btn" data-lib="arco">Arco Design</button>
-          <button type="button" class="lib-btn" data-lib="antd">Ant Design</button>
-          <div class="toolbar-spacer"></div>
-          <a
-            class="github-link"
-            href="https://github.com/chesongsong/x-langjs"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            title="GitHub"
-          >
-            <svg class="github-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path
-                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
-              />
-            </svg>
-            <span>GitHub</span>
-          </a>
+    <!-- 简单 Demo 面板 -->
+    <div id="panel-simple" class="demo-panel">
+      <div class="simple-demo-root">
+
+        <!-- 左：两个渲染输出 -->
+        <div class="simple-outputs">
+          <div class="simple-section">
+            <h3>Vue 渲染（Ant Design）</h3>
+            <p class="simple-hint">点击按钮查看组件源码 →</p>
+            <div id="simple-vue-output" class="simple-ui-output"></div>
+          </div>
+          <div class="simple-section">
+            <h3>React 渲染</h3>
+            <p class="simple-hint">点击按钮查看组件源码 →</p>
+            <div id="simple-react-output" class="simple-ui-output"></div>
+          </div>
         </div>
-        <div id="event-status"></div>
-        <div id="output-content"></div>
-      </section>
-    </main>
+
+        <!-- 右：点击后展示的源代码 -->
+        <div id="simple-code-panel" class="simple-code-panel" style="display:none">
+          <div class="simple-code-header">
+            <span id="simple-code-title"></span>
+            <button id="simple-code-close" title="关闭">✕</button>
+          </div>
+          <pre id="simple-code-pre"><code id="simple-code-content"></code></pre>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 对话 Demo 面板 -->
+    <div id="panel-conversation" class="demo-panel" style="display:none">
+      <div id="conv-messages" class="conv-messages"></div>
+      <div class="conv-input-bar">
+        <select id="conv-scenario">
+          <option value="button">发送：按钮示例</option>
+          <option value="table">发送：表格示例</option>
+          <option value="mixed">发送：混合内容</option>
+        </select>
+        <button id="conv-send" class="conv-send-btn">发送 →</button>
+        <button id="conv-clear" class="conv-clear-btn">清空</button>
+      </div>
+    </div>
+
+    <!-- 复杂 Demo 面板（原 playground 布局）-->
+    <div id="panel-complex" class="demo-panel" style="display:none">
+      <main id="main">
+        <section id="editor-panel">
+          <div id="editor-toolbar">
+            <button id="btn-stream" class="toolbar-btn primary">流式演示</button>
+            <button id="btn-stop" class="toolbar-btn danger" style="display:none">停止</button>
+            <span id="stream-status" class="stream-status"></span>
+          </div>
+          <div id="editor"></div>
+        </section>
+
+        <div id="divider"></div>
+
+        <section id="output-panel">
+          <div id="output-toolbar">
+            <button type="button" class="lib-btn active" data-lib="element">Element Plus</button>
+            <button type="button" class="lib-btn" data-lib="arco">Arco Design</button>
+            <button type="button" class="lib-btn" data-lib="antd">Ant Design</button>
+            <div class="toolbar-spacer"></div>
+          </div>
+          <div id="event-status"></div>
+          <div id="output-content"></div>
+        </section>
+      </main>
+    </div>
+
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>

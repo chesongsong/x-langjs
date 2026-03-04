@@ -24,10 +24,10 @@ importers:
 
   packages/ast:
     dependencies:
-      '@x-lang/parser':
+      '@x-langjs/parser':
         specifier: workspace:*
         version: link:../parser
-      '@x-lang/types':
+      '@x-langjs/types':
         specifier: workspace:*
         version: link:../types
       antlr4ng:
@@ -36,19 +36,19 @@ importers:
 
   packages/core:
     dependencies:
-      '@x-lang/ast':
+      '@x-langjs/ast':
         specifier: workspace:*
         version: link:../ast
-      '@x-lang/interpreter':
+      '@x-langjs/interpreter':
         specifier: workspace:*
         version: link:../interpreter
-      '@x-lang/parser':
+      '@x-langjs/parser':
         specifier: workspace:*
         version: link:../parser
-      '@x-lang/render':
+      '@x-langjs/render':
         specifier: workspace:*
         version: link:../render
-      '@x-lang/types':
+      '@x-langjs/types':
         specifier: workspace:*
         version: link:../types
       antlr4ng:
@@ -57,7 +57,7 @@ importers:
 
   packages/interpreter:
     dependencies:
-      '@x-lang/types':
+      '@x-langjs/types':
         specifier: workspace:*
         version: link:../types
       dayjs:
@@ -66,7 +66,7 @@ importers:
 
   packages/parser:
     dependencies:
-      '@x-lang/types':
+      '@x-langjs/types':
         specifier: workspace:*
         version: link:../types
       antlr4ng:
@@ -75,7 +75,7 @@ importers:
 
   packages/render:
     dependencies:
-      '@x-lang/interpreter':
+      '@x-langjs/interpreter':
         specifier: workspace:*
         version: link:../interpreter
     devDependencies:
@@ -93,10 +93,10 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.4
         version: 6.0.4(vite@6.4.1)(vue@3.5.29(typescript@5.9.3))
-      '@x-lang/core':
+      '@x-langjs/core':
         specifier: workspace:*
         version: link:../packages/core
-      '@x-lang/render':
+      '@x-langjs/render':
         specifier: workspace:*
         version: link:../packages/render
       ant-design-vue:

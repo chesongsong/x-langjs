@@ -69,7 +69,7 @@ fi
 # 2. 安装依赖并构建
 echo ""
 echo ">>> 安装依赖..."
-pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
 
 echo ">>> 构建 types..."
 pnpm --filter @x-langjs/types run build

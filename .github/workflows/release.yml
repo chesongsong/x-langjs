@@ -1,6 +1,8 @@
-# 推送 v* tag 时自动构建并发布到 GitHub Release，同时发布 @x-lang/* 到 npm
+# 推送 v* tag 时自动构建并：
+#   1. 发布到 GitHub Release（附带 x-lang.min.js 等产物）
+#   2. 发布 @x-lang/* 到 npmjs.com（需配置 NPM_TOKEN secret）
+#   3. 发布 @chesongsong/x-lang-core 到 GitHub Packages（使用内置 GITHUB_TOKEN，无需额外配置）
 # 使用方式：git tag v0.0.1 && git push origin v0.0.1
-# 需在仓库 Settings → Secrets and variables → Actions 中配置 NPM_TOKEN
 
 name: Release
 
@@ -11,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
@@ -103,10 +106,58 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 发布 @x-lang/* 到 npm（需配置 NPM_TOKEN secret）
-      - name: Publish to npm
-        if: ${{ env.NPM_TOKEN != '' }}
+      # 发布 @x-lang/* 到 npmjs.com（需配置 NPM_TOKEN secret）
+      - name: Publish to npmjs.com
+        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish -r --no-git-checks --access public
+
+      # 发布 @chesongsong/x-lang-core 到 GitHub Packages（使用内置 GITHUB_TOKEN，无需额外配置）
+      # GitHub Packages 要求 scope 必须匹配仓库所有者，所以用 @chesongsong/x-lang-core
+      - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 基于已构建的 core/dist，构造一个专用于 GitHub Packages 的临时发布目录
+          mkdir -p gh-publish/dist
+
+          # 复制构建产物
+          cp -r packages/core/dist/. gh-publish/dist/
+
+          # 构造 package.json（scope 换成 @chesongsong，registry 指向 GitHub Packages）
+          cat > gh-publish/package.json << PKGJSON
+          {
+            "name": "@chesongsong/x-lang-core",
+            "version": "${VERSION_NPM}",
+            "description": "Core package for x-lang — parse, tokenize, and work with x-lang AST",
+            "type": "module",
+            "main": "./dist/index.cjs",
+            "module": "./dist/index.mjs",
+            "types": "./dist/index.d.ts",
+            "exports": {
+              ".": {
+                "types": "./dist/index.d.ts",
+                "import": "./dist/index.mjs",
+                "require": "./dist/index.cjs"
+              }
+            },
+            "files": ["dist"],
+            "repository": {
+              "type": "git",
+              "url": "https://github.com/chesongsong/x-lang.git"
+            },
+            "publishConfig": {
+              "registry": "https://npm.pkg.github.com"
+            },
+            "dependencies": {
+              "antlr4ng": "^3.0.16"
+            }
+          }
+          PKGJSON
+
+          # 写入 .npmrc 使用 GITHUB_TOKEN 鉴权
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > gh-publish/.npmrc
+
+          cd gh-publish
+          npm publish --access public

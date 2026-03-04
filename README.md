@@ -4,6 +4,8 @@
 
 ANTLR4 + TypeScript DSL runtime that executes `x-langjs` code blocks in Markdown and renders outputs through a pluggable UI layer.
 
+**Fully custom rendering** — the runtime does not depend on any UI component library. You register your own components (e.g. table, button, card) and implement their UI with any framework or library you choose (Vue, React, Element Plus, Ant Design, or plain HTML). The core only provides the DSL execution and a thin render contract; all visuals are under your control.
+
 ## Project Structure
 
 ```text

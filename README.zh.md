@@ -4,6 +4,8 @@
 
 `x-langjs` 是一个基于 ANTLR4 + TypeScript 的 DSL 运行时，支持在 Markdown 中执行 `x-langjs` 代码块，并通过可插拔 UI 渲染输出。
 
+**完全自定义渲染** — 运行时不依赖任何 UI 组件库。你可以自行注册组件（如 table、button、card 等），并用任意框架或库（Vue、React、Element Plus、Ant Design 或纯 HTML）实现其界面。核心只负责 DSL 执行与薄薄一层渲染约定，所有视觉效果由你完全掌控。
+
 ## 项目结构
 
 ```text

@@ -1,6 +1,6 @@
 {
   "name": "@x-langjs/types",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "TypeScript type definitions for x-lang AST, tokens, and errors",
   "type": "module",
   "main": "./dist/index.js",

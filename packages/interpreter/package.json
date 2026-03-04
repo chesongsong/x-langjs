@@ -1,6 +1,6 @@
 {
   "name": "@x-langjs/interpreter",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Interpreter for x-lang AST",
   "type": "module",
   "main": "./dist/index.js",

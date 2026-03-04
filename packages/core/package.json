@@ -1,6 +1,6 @@
 {
   "name": "@x-langjs/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Core package for x-lang — parse, tokenize, and work with x-lang AST",
   "type": "module",
   "main": "./dist/index.js",

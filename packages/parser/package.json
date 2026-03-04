@@ -1,6 +1,6 @@
 {
   "name": "@x-langjs/parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "ANTLR4-based lexer and parser for x-lang",
   "type": "module",
   "main": "./dist/index.js",

@@ -81,7 +81,7 @@ import { parse, run, XLangApp } from "@x-langjs/core";
 
 ```html
 <!-- 从 Releases 下载后放到项目目录 -->
-<script src="x-lang-0.1.0.min.js"></script>
+<script src="x-lang-0.0.2.min.js"></script>
 <script>
   const { parse, run } = XLang;
 
@@ -106,10 +106,10 @@ total
 
 ```javascript
 // ESM
-import { parse, run } from "./x-lang-0.1.0.mjs";
+import { parse, run } from "./x-lang-0.0.2.esm.mjs";
 
 // CJS
-const { parse, run } = require("./x-lang-0.1.0.cjs");
+const { parse, run } = require("./x-lang-0.0.2.cjs");
 ```
 
 ## 语言特性

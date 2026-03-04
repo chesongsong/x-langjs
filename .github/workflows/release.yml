@@ -1,6 +1,6 @@
-# 在推送版本 tag（如 v0.1.0）时构建产物、发布到 GitHub Release，并发布 @x-lang/* 到 npm
-# 使用方式：git tag v0.1.0 && git push origin v0.1.0
-# 需在仓库 Settings → Secrets 中配置 NPM_TOKEN（npm 的 Automation 或 Classic Token）
+# 推送 v* tag 时自动构建并发布到 GitHub Release，同时发布 @x-lang/* 到 npm
+# 使用方式：git tag v0.0.1 && git push origin v0.0.1
+# 需在仓库 Settings → Secrets and variables → Actions 中配置 NPM_TOKEN
 
 name: Release
 
@@ -29,14 +29,14 @@ jobs:
           cache: "pnpm"
           registry-url: "https://registry.npmjs.org"
 
-      # 从 tag 提取版本号，并同步写入各包 package.json，后续步骤均可使用 $VERSION / $VERSION_NPM
+      # 从 tag 提取版本号（v0.0.1 → 0.0.1），写入各包 package.json
       - name: Extract version from tag
         run: |
           VERSION="${GITHUB_REF#refs/tags/}"
           VERSION_NPM="${VERSION#v}"
           echo "VERSION=$VERSION"         >> $GITHUB_ENV
           echo "VERSION_NPM=$VERSION_NPM" >> $GITHUB_ENV
-          echo "Detected version: $VERSION (npm: $VERSION_NPM)"
+          echo "Building version: $VERSION (npm: $VERSION_NPM)"
           export VERSION_NPM
           for f in packages/*/package.json; do
             node -e "
@@ -46,7 +46,6 @@ jobs:
               fs.writeFileSync('$f', JSON.stringify(p, null, 2) + '\n');
             "
           done
-          echo "All packages updated to $VERSION_NPM"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -54,52 +53,60 @@ jobs:
       - name: Build types first
         run: pnpm --filter @x-lang/types run build
 
-      # 包含 antlr-ng generate + tsc + esbuild (index.mjs / index.cjs / x-lang.min.js)
-      - name: Build x-lang core & packages
+      # generate + tsc + esbuild → index.mjs / index.cjs / x-lang.min.js
+      - name: Build all packages
         run: pnpm run build
 
-      - name: Verify build artifacts
+      - name: Check build output
         run: |
-          echo "=== Core dist ===" && ls -lh packages/core/dist/
-          test -f packages/core/dist/x-lang.min.js || (echo "ERROR: x-lang.min.js not found" && exit 1)
+          echo "=== packages/core/dist ==="
+          ls -lh packages/core/dist/
+          test -f "packages/core/dist/x-lang.min.js" || { echo "ERROR: x-lang.min.js not found!"; exit 1; }
 
-      - name: Prepare release artifacts
+      # 将产物复制到临时目录，文件名含版本号
+      - name: Copy release files
         run: |
-          mkdir -p release-artifacts
-          cp packages/core/dist/x-lang.min.js     "release-artifacts/x-lang-${VERSION_NPM}.min.js"
-          cp packages/core/dist/x-lang.min.js.map "release-artifacts/x-lang-${VERSION_NPM}.min.js.map" 2>/dev/null || true
-          cp packages/core/dist/index.mjs         "release-artifacts/x-lang-${VERSION_NPM}.mjs"
-          cp packages/core/dist/index.cjs         "release-artifacts/x-lang-${VERSION_NPM}.cjs"
-          echo "=== Release artifacts ===" && ls -lh release-artifacts/
+          mkdir -p dist-release
+          cp "packages/core/dist/x-lang.min.js"     "dist-release/x-lang-${VERSION_NPM}.min.js"
+          cp "packages/core/dist/x-lang.min.js.map" "dist-release/x-lang-${VERSION_NPM}.min.js.map" 2>/dev/null || true
+          cp "packages/core/dist/index.mjs"         "dist-release/x-lang-${VERSION_NPM}.esm.mjs"
+          cp "packages/core/dist/index.cjs"         "dist-release/x-lang-${VERSION_NPM}.cjs"
+          echo "=== dist-release ==="
+          ls -lh dist-release/
 
-      - name: Read changelog for release body
+      # 从 CHANGELOG 提取当前版本的发行说明
+      - name: Generate release notes
         run: |
           VERSION_ESC=$(printf '%s' "${VERSION_NPM}" | sed 's/\./\\./g')
           if [ -f CHANGELOG.md ]; then
-            sed -n "/^## \[${VERSION_ESC}\]/,/^## /p" CHANGELOG.md | sed '$d' > release-body.md 2>/dev/null || true
+            sed -n "/^## \[${VERSION_ESC}\]/,/^## /p" CHANGELOG.md | sed '$d' > release-notes.md 2>/dev/null || true
           fi
-          if [ ! -s release-body.md ]; then
-            printf "## 发行说明\n\n详见 [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md)。\n" \
-              "${{ github.repository }}" "${{ github.ref_name }}" > release-body.md
+          if [ ! -s release-notes.md ]; then
+            printf "## %s\n\n详见 [CHANGELOG.md](https://github.com/chesongsong/x-lang/blob/%s/CHANGELOG.md)。\n" \
+              "$VERSION" "$VERSION" > release-notes.md
           fi
-          echo "--- Release body ---" && cat release-body.md
+          echo "=== Release notes ===" && cat release-notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          body_path: release-body.md
-          files: |
-            release-artifacts/x-lang-*.min.js
-            release-artifacts/x-lang-*.mjs
-            release-artifacts/x-lang-*.cjs
-          generate_release_notes: false
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
           draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            dist-release/x-lang-${{ env.VERSION_NPM }}.min.js
+            dist-release/x-lang-${{ env.VERSION_NPM }}.esm.mjs
+            dist-release/x-lang-${{ env.VERSION_NPM }}.cjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 发布 @x-lang/* 到 npm（需配置 NPM_TOKEN secret）
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: ${{ env.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish -r --no-git-checks --access public

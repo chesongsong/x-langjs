@@ -2,7 +2,7 @@
 
 本文档记录 x-lang 的版本变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。
 
-## [0.1.0] - 2026-03-02
+## [0.0.1] - 2026-03-02
 
 首个正式发布版本。
 
@@ -32,4 +32,4 @@
 - 根目录：`pnpm install` → `pnpm run build` → `pnpm run dev` 启动 Playground。
 - 集成：通过 `@x-lang/core` 的 `parse`、`run`、`XLangApp`、`defineComponent` 等 API 接入自有项目。
 
-[0.1.0]: https://github.com/chesongsong/x-lang/releases/tag/v0.1.0
+[0.0.1]: https://github.com/chesongsong/x-lang/releases/tag/v0.0.1

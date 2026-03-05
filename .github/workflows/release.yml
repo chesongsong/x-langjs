@@ -106,7 +106,6 @@ jobs:
 
       # 发布 @x-langjs/* 到 npmjs.com（需在仓库 Settings → Secrets 中配置 NPM_TOKEN）
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish -r --no-git-checks --access public
